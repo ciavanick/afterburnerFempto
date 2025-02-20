@@ -15,6 +15,29 @@ bool simpleCoal::docoal(const particleMC& p1, const particleMC& p2){ // perform 
     return false;
   }
 
+  int charge = std::abs(p1.ColoumbC + p2.ColoumbC);
+  float mass = p1.q.M() + p2.q.M();
+
+  if(charge < 1){ // no nuclei with Z=0
+    return false;
+  }
+
+  if(charge == 1 && mass > 3){ // only D,T allowed
+    return false;
+  }
+
+  if(charge == 2 && (mass < 2 || mass > 4)){ // He: A=3,4 allowed
+    return false;
+  }
+
+  if(charge == 3 && (mass < 5 || mass > 7)){ // Li: A=6,7 allowed
+    return false;
+  }
+
+  if(charge > 3){
+    return false;
+  }
+
   if(p1.ColoumbC != 0 || p2.ColoumbC != 0){
 
   }
