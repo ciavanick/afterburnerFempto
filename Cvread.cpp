@@ -47,8 +47,8 @@ bool vreader::LoadEvent(int iev){
     return 1;
   }
 
-  mTree->GetEvent(iev);
   mParticles.clear();
+  mTree->GetEvent(iev);
 
   return 0;
 }

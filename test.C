@@ -11,8 +11,8 @@ vreader *reader;
 
 void test(bool interact=true, bool coalescence=true, bool noHe=false){
   if(fromFile){
-    reader = new readerFE();
-    reader->openFile("lista",true); // true to read a collection
+    reader = new readerMC();
+    reader->openFile("listaMC",true); // true to read a collection
   }
 
   bool samePart = true;
@@ -229,6 +229,7 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
   hPr->Write();
   hNe->Write();
   hDe->Write();
+  hHe->Write();
   hMass->Write();
   fout->Close();
 }

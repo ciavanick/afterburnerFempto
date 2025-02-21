@@ -4,7 +4,7 @@
 #include "version/version.h"
 
 int main(int argc, char **argv){
-  TRint *theApp = new TRint("eeeroot", &argc, argv);
+  TRint *theApp = new TRint("coalroot", &argc, argv);
 
   theApp->Run();  
 
