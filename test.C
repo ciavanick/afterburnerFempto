@@ -11,8 +11,8 @@ vreader *reader;
 
 void test(bool interact=true, bool coalescence=true, bool noHe=false){
   if(fromFile){
-    reader = new readerFE("data/outtree_nev100000_run0.root");
-    reader->openFile();
+    reader = new readerFE();
+    reader->openFile("lista",true); // true to read a collection
   }
 
   bool samePart = true;

@@ -16,7 +16,7 @@ class vreader
     void NextEvent() { mIEvent++; LoadEvent(mIEvent); };
     int getCurrentEventID() const { return mIEvent; }
     virtual const char* getTreeName() const = 0;
-    virtual void openFile(const char *fname = nullptr);
+    virtual void openFile(const char *fname = nullptr, bool fromCollection=false);
     virtual void clear();
     void setEtaRange(float minE, float maxE) { mMinEta = minE, mMaxEta = maxE; }
     float getMinEta() const { return mMinEta; }

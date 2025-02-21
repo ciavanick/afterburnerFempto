@@ -1,6 +1,6 @@
 #include "Cvread.h"
 
-void vreader::openFile(const char *fname){
+void vreader::openFile(const char *fname, bool fromCollection){
   if(mIsOpened){
     printf("file reader already set, clear it if you want to reuse it\n");
   }
@@ -10,7 +10,16 @@ void vreader::openFile(const char *fname){
   }
 
   mTree = new TChain(getTreeName());
-  mTree->AddFile(fname);
+  if(fromCollection){
+    FILE *fin = fopen(fname,"r");
+    char namefile[1000];
+    while(fscanf(fin,"%s",namefile) == 1){
+      mTree->AddFile(namefile);
+    }
+    fclose(fin);
+  } else {
+    mTree->AddFile(fname);
+  }
 
   if(mTree->GetEntries() < 1){
     printf("no events found\n");
