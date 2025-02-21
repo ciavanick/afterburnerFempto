@@ -18,7 +18,7 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
   bool samePart = true;
 
   const int nbins = 20;
-  const int nev = fromFile ? reader->getNevents() : 5E4;
+  const int nev = fromFile ? reader->getNevents() : 1E5;
   const int nmix = 5;
 
   int chargeComb = 1; // 1=same charge, -1=opposite charge
@@ -178,11 +178,14 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
 
   printf("nDeu = %d - nAntiDeu = %d\n",nDeu, nAntiDeu);
 
-  hb->Scale(h->Integral(nbins/2+1,nbins) / hb->Integral(nbins/2+1,nbins));
+  float adjustScaling = h->Integral(nbins/2+1,nbins) / hb->Integral(nbins/2+1,nbins);
+  hb->Scale(adjustScaling);
 
   h->Sumw2();
   h2->Sumw2();
   h2->Divide(hb);
+
+  hb->Scale(1./adjustScaling); //remove scaling before to store
 
   TCanvas *c = new TCanvas;
   h2->Draw();

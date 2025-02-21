@@ -9,7 +9,7 @@ bool simpleCoal::docoal(const particleMC& p1, const particleMC& p2){ // perform 
 
   int mergedPdg = p1.pdg+p2.pdg;
 
-  if(std::abs(mergedPdg) != 4324 && std::abs(mergedPdg) != 6536 && std::abs(mergedPdg) != 8648 && std::abs(mergedPdg) != 12972 && std::abs(mergedPdg) != 15084){
+  if(std::abs(mergedPdg) != 4324 && std::abs(mergedPdg) != 6436 && std::abs(mergedPdg) != 6536 && std::abs(mergedPdg) != 8648 && std::abs(mergedPdg) != 12972 && std::abs(mergedPdg) != 15084){
     return false;
   }
 
