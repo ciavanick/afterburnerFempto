@@ -2,6 +2,7 @@
 #define CUTILS
 
 #include "TLorentzVector.h"
+#include "TDatabasePDG.h"
 
 class particle
 {

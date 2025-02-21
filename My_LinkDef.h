@@ -11,5 +11,7 @@
 #pragma link C++ class fempto++;
 #pragma link C++ class vcoal++;
 #pragma link C++ class simpleCoal++;
+#pragma link C++ class vreader++;
+#pragma link C++ class readerFE++;
 
 #endif

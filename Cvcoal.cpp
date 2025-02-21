@@ -21,10 +21,6 @@ void vcoal::doCoalAll(std::vector<particleMC>& part){
 
         int cC2 = part[i2].ColoumbC;
 
-        if(cC * cC2 != 0){ // one neutral particle expected
-          continue;
-        }
-
         if(part[i1].pdg * part[i2].pdg < 0){ // one particle and one antiparticle -> skip
           continue;
         }
@@ -47,6 +43,10 @@ void vcoal::doCoalAll(std::vector<particleMC>& part){
     });
 
     for(const auto& o : intPairs){ // do interactions starting from lower kstar
+      if(part[o.first].daughters.size() || part[o.second].daughters.size()){
+        continue;
+      }
+
       if(docoal(part[o.first],part[o.second])){
         particleMC merged = merge(part[o.first],part[o.second]);
         if(merged.q.M() > mMassMax){ // skip it
@@ -76,8 +76,6 @@ particleMC vcoal::merge(const particleMC& p1, const particleMC& p2){
   pSum.mother = -1;              // not tracing mothers
   pSum.StrongC = p1.StrongC + p2.StrongC;
   pSum.ColoumbC = p1.ColoumbC + p2.ColoumbC;
-
-//  printf("merged = %d - %f + %f = %f\n",pSum.pdg,p1.q.P(),p2.q.P(),pSum.q.P());
 
   return pSum;
 }

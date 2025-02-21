@@ -1,15 +1,24 @@
-void doEvent(std::vector<particleMC>& part);
+std::vector<particleMC>&doToyEvent();
+std::vector<particleMC>& readEvent();
 bool sel1(const particleMC& p);
 bool sel2(const particleMC& p);
 bool isproton(const particleMC& p);
 
 float meson_downscale = 0.1;
+bool fromFile = false;
+
+vreader *reader;
 
 void test(bool interact=true, bool coalescence=true, bool noHe=false){
+  if(fromFile){
+    reader = new readerFE("data/outtree_nev100000_run0.root");
+    reader->openFile();
+  }
+
   bool samePart = true;
 
   const int nbins = 20;
-  const int nev = 1E5;
+  const int nev = fromFile ? reader->getNevents() : 5E4;
   const int nmix = 5;
 
   int chargeComb = 1; // 1=same charge, -1=opposite charge
@@ -54,8 +63,11 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
   int nAntiDeu=0;
 
   for(int i=1; i < nmix; i++){
-    doEvent(evPrev[i]);
-
+    if(fromFile){
+      evPrev[i] = readEvent();
+    } else {
+      evPrev[i] = doToyEvent();
+    }
     if(coalescence){
       coalescer->doCoalAll(evPrev[i]);
     }
@@ -65,11 +77,11 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
     }
   }
 
-  std::vector<particleMC> event;
   printf("start running events \n");
-  for(int i=0; i < nev; i++){
+  for(int i=0; i < nev-nmix; i++){
+    if(! (i%10000)) printf("%d/%d\n",i,nev);
     int lev = i % nmix;
-    doEvent(event);
+    std::vector<particleMC>& event = fromFile ? readEvent() : doToyEvent();
 
     if(coalescence){
       coalescer->doCoalAll(event);
@@ -88,15 +100,15 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
 
       hMass->Fill(p1.q.M());
 
-      if(p1.pdg > 5000){
+      if(p1.pdg == 6536){
         hHe->Fill(p1.q.P()/3);
-      } else if(p1.pdg > 3000){
+      } else if(p1.pdg == 4324){
         nDeu++;
         hDe->Fill(p1.q.P()*0.5);
       }
-      if(p1.pdg < -5000){
+      if(p1.pdg == -6536){
         hHe->Fill(p1.q.P()/3);
-      } else if(p1.pdg < -3000){
+      } else if(p1.pdg == -4324){
         nAntiDeu++;
         hDe->Fill(p1.q.P()*0.5);
       }
@@ -218,7 +230,14 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
   fout->Close();
 }
 
-void doEvent(std::vector<particleMC>& part){
+std::vector<particleMC>& readEvent(){
+  reader->NextEvent();
+  return reader->getParticles();
+}
+
+std::vector<particleMC>& doToyEvent(){
+  static std::vector<particleMC> part;
+
   part.clear();
 
   int np = gRandom->Gaus(15,3);
@@ -268,6 +287,7 @@ void doEvent(std::vector<particleMC>& part){
     }
     part.push_back(p);
   }
+  return part;
 }
 
 bool sel1(const particleMC& p){

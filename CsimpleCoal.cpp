@@ -7,7 +7,9 @@ bool simpleCoal::docoal(const particleMC& p1, const particleMC& p2){ // perform 
     return false;
   }
 
-  if(std::abs(p1.pdg) < 999 || std::abs(p2.pdg) < 999){
+  int mergedPdg = p1.pdg+p2.pdg;
+
+  if(std::abs(mergedPdg) != 4324 && std::abs(mergedPdg) != 6536 && std::abs(mergedPdg) != 8648 && std::abs(mergedPdg) != 12972 && std::abs(mergedPdg) != 15084){
     return false;
   }
 
@@ -18,32 +20,9 @@ bool simpleCoal::docoal(const particleMC& p1, const particleMC& p2){ // perform 
   int charge = std::abs(p1.ColoumbC + p2.ColoumbC);
   float mass = p1.q.M() + p2.q.M();
 
-  if(charge < 1){ // no nuclei with Z=0
-    return false;
-  }
-
-  if(charge == 1 && mass > 3){ // only D,T allowed
-    return false;
-  }
-
-  if(charge == 2 && (mass < 2 || mass > 4)){ // He: A=3,4 allowed
-    return false;
-  }
-
-  if(charge == 3 && (mass < 5 || mass > 7)){ // Li: A=6,7 allowed
-    return false;
-  }
-
-  if(charge > 3){
-    return false;
-  }
-
-  if(p1.ColoumbC != 0 || p2.ColoumbC != 0){
-
-  }
-
   if(kstar < 0.05){
 //    printf("%d %d \n",p1.pdg,p2.pdg);
+
     return true;
   }
 
