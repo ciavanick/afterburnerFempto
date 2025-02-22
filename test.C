@@ -3,6 +3,7 @@ std::vector<particleMC>& readEvent();
 bool sel1(const particleMC& p);
 bool sel2(const particleMC& p);
 bool isproton(const particleMC& p);
+bool isdeuteron(const particleMC& p);
 
 float meson_downscale = 0.1;
 bool fromFile = false;
@@ -30,14 +31,15 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
 
   float sourceSize = 0;
 
-  fempto interactor;
+  vfempto *interactor= new vfempto;   // simple model box potential
+//  vfempto *interactor= new fempto;      // Lenard-Jones  strong potential
   vcoal *coalescer = new simpleCoal();
 
   if(noHe){
     coalescer->setMassMax(2);
   }
 
-  interactor.setParams(2.2E-3, 2.4, 1.44E-3, sourceSize);
+//  interactor->setParams(2.2E-3, 2.4, 1.44E-3, sourceSize);
 
   TH1D *h = new TH1D("h",";k* (GeV/c)",nbins,0,0.2);
   TH1D *h2 = new TH1D("h2",";k* (GeV/c)",nbins,0,0.2);
@@ -73,13 +75,13 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
     }
 
     if(interact){
-      interactor.doInteractAll(evPrev[i]);
+      interactor->doInteractAll(evPrev[i]);
     }
   }
 
   printf("start running events \n");
   for(int i=0; i < nev-nmix; i++){
-    if(! (i%10000)) printf("%d/%d\n",i,nev);
+    if(! (i%100000)) printf("%d/%d\n",i,nev);
     int lev = i % nmix;
     std::vector<particleMC>& event = fromFile ? readEvent() : doToyEvent();
 
@@ -88,7 +90,7 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
     }
 
     if(interact){
-      interactor.doInteractAll(event);
+      interactor->doInteractAll(event);
     }
 
     for(int i1=0; i1 < event.size(); i1++){ // same event
@@ -309,3 +311,9 @@ bool isproton(const particleMC& p){
   return false;
 }
 
+bool isdeuteron(const particleMC& p){
+  if(std::abs(p.pdg) == 4324){
+    return true;
+  }
+  return false;
+}

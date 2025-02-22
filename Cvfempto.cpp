@@ -1,7 +1,76 @@
-#include "Cfempto.h"
+#include "Cvfempto.h"
 #include "TRandom.h"
 
-double fempto::doInteract(particleMC& p1, particleMC& p2, float chargeColoumb, float chargeStrong, float sumRadii, float *pos, float *posLab){
+void vfempto::doInteractAll(std::vector<particleMC>& part){
+  // build pairs only if both charged
+  std::vector<std::pair<int,int>> intPairs;
+  for(int i1 = 0; i1 < part.size(); i1++){
+    int sC = part[i1].StrongC;
+    int cC = part[i1].ColoumbC;
+
+    if(part[i1].mother > -1){ // only mother inteacts
+      continue;
+    }
+
+    if(!(sC || cC)){ // particle can interact otherwise skip
+      continue;
+    }
+
+    for(int i2 = i1+1; i2 < part.size(); i2++){
+      if(part[i2].mother > -1){ // only mother inteacts
+        continue;
+      }
+
+      if(!(part[i2].StrongC && sC || part[i2].ColoumbC && cC)){ // two particles can interact otherwise skip
+        continue;
+      }
+
+      double kstar = utils::getKstar(part[i1],part[i2]);
+      if(kstar > 0.4){
+        continue;
+      }
+
+      intPairs.push_back(std::make_pair(i1,i2));
+    }
+  }
+
+  // sorting by kstar
+  std::sort(intPairs.begin(), intPairs.end(), [part](const auto &a, const auto &b)
+  {
+     double ks1 = utils::getKstar(part[a.first],part[a.second]);
+     double ks2 = utils::getKstar(part[b.first],part[b.second]);
+     return ks1 < ks2;
+  });
+
+  for(const auto& o : intPairs){ // do interactions starting from lower kstar
+     particleMC original1 = part[o.first];
+     particleMC original2 = part[o.second];
+
+     doInteract(part[o.first],part[o.second],part[o.first].ColoumbC*part[o.second].ColoumbC,part[o.first].StrongC*part[o.second].StrongC,0);
+
+     // propagate effect of the inteaction to daugher particles
+     for(const auto& id : original1.daughters){
+       particleMC& dau = part[id];
+       TVector3 bF = original1.q.BoostVector();       // before interaction
+       TVector3 bFinv = -bF;
+       TVector3 bA = part[o.first].q.BoostVector();   // after interaction
+
+       dau.q.Boost(bFinv);
+       dau.q.Boost(bA);
+     }
+     for(const auto& id : original2.daughters){
+       particleMC& dau = part[id];
+       TVector3 bF = original2.q.BoostVector();       // before interaction
+       TVector3 bFinv = -bF;
+       TVector3 bA = part[o.second].q.BoostVector();  // after interaction
+
+       dau.q.Boost(bFinv);
+       dau.q.Boost(bA);
+     }
+  }
+}
+//_________________________________________________________________________
+double vfempto::doInteract(particleMC& p1, particleMC& p2, float chargeColoumb, float chargeStrong, float sumRadii, float *pos, float *posLab){
   double kstar = utils::getKstar(p1,p2);
 
   float *lpos,*lposLab; // 3+3 position vectors
@@ -19,7 +88,7 @@ double fempto::doInteract(particleMC& p1, particleMC& p2, float chargeColoumb, f
 
   TVector3 impactparam(0,0,0);
 
-  float sumRadiiOr = TMath::Power(p1.q.M(),1./3) + TMath::Power(p2.q.M(),1./3);//sumRadii;
+  float sumRadiiOr = sumRadii;
 
   sumRadii = 0.1973 * 0.5 / kstar;
 
@@ -66,13 +135,7 @@ double fempto::doInteract(particleMC& p1, particleMC& p2, float chargeColoumb, f
   float dist = sqrt(impactparam.Mag2());
   float deltaE = 0;
   deltaE = chargeColoumb * mCoulomb / dist;         // Columb contribution (repulsive/attractive)
-//  deltaE -= chargeStrong*mStrong*(dist < mStrongR); // Strong potential attractive
-
-  float rad6 = mStrongR*sqrt(sumRadiiOr*0.5)/dist;
-  rad6 = rad6*rad6; // ^2
-  rad6 = rad6*rad6*rad6; // ^6
-  float rad12 = rad6*rad6; // ^12
-  deltaE += chargeStrong*TMath::Min(0.,mStrong*double(-rad6 + 2*rad12)); // Lenard-Jones limited to +200 MeV
+  deltaE -= chargeStrong*mStrong*(dist < mStrongR); // Strong potential attractive
 
   double E0 = p1.q.Energy()+p2.q.Energy();
   double M0 = p1.q.M() + p2.q.M();
