@@ -2,11 +2,15 @@ std::vector<particleMC>&doToyEvent();
 std::vector<particleMC>& readEvent();
 bool sel1(const particleMC& p);
 bool sel2(const particleMC& p);
-bool isproton(const particleMC& p);
-bool isdeuteron(const particleMC& p);
 
 float meson_downscale = 0.1;
 bool fromFile = false;
+
+int pdgPr = 2212; // proton
+int pdgDe = 4324; // deuteron
+
+int pdg1 = pdgPr;
+int pdg2 = pdgPr;
 
 vreader *reader;
 
@@ -16,10 +20,10 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
     reader->openFile("listaMC",true); // true to read a collection
   }
 
-  bool samePart = true;
+  bool samePart = (pdg1 == pdg2);
 
   const int nbins = 20;
-  const int nev = fromFile ? reader->getNevents() : 1E5;
+  const int nev = fromFile ? reader->getNevents() : 1E6;
   const int nmix = 5;
 
   int chargeComb = 1; // 1=same charge, -1=opposite charge
@@ -96,10 +100,6 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
     for(int i1=0; i1 < event.size(); i1++){ // same event
       const particleMC& p1 = event[i1];
 
-      if(p1.daughters.size()){
-        continue;
-      }
-
       hMass->Fill(p1.q.M());
 
       if(p1.pdg == 6536){
@@ -122,15 +122,18 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
         hNe->Fill(p1.q.P());
       }
 
-      if(! isproton(p1)){
+      if(!sel1(p1)){
         continue;
       }
+
       for(int i2=(i1+1)*samePart; i2 < event.size(); i2++){
         const particleMC& p2 = event[i2];
-        if(p2.daughters.size()){
+
+        if(!sel2(p2)){
           continue;
         }
-        if((!isproton(p2)) || chargeComb*p1.ColoumbC*p2.ColoumbC < 0){
+
+        if(chargeComb*p1.ColoumbC*p2.ColoumbC < 0){
           continue;
         }
 
@@ -150,21 +153,19 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
       }
       for(int i1=0; i1 < event.size(); i1++){
         const particleMC& p1 = event[i1];
-        if(p1.daughters.size()){
-          continue;
-        }
 
-        if(! isproton(p1)){
+        if(!sel1(p1)){
           continue;
         }
 
         for(int i2=0; i2 < evPrev[j] .size(); i2++){
           const particleMC& p2 = evPrev[j][i2];
-          if(p2.daughters.size()){
+
+          if(!sel1(p1)){
             continue;
           }
 
-          if((!isproton(p2)) || chargeComb*p1.ColoumbC*p2.ColoumbC < 0){
+          if(chargeComb*p1.ColoumbC*p2.ColoumbC < 0){
             continue;
           }
 
@@ -297,23 +298,15 @@ std::vector<particleMC>& doToyEvent(){
 }
 
 bool sel1(const particleMC& p){
-  return isproton(p);
+  if(p.daughters.size()){
+    return false;
+  }
+  return (std::abs(p.pdg) == pdg1);
 }
 
 bool sel2(const particleMC& p){
-  return isproton(p);
-}
-
-bool isproton(const particleMC& p){
-  if(std::abs(p.pdg) == 2212){
-    return true;
+  if(p.daughters.size()){
+    return false;
   }
-  return false;
-}
-
-bool isdeuteron(const particleMC& p){
-  if(std::abs(p.pdg) == 4324){
-    return true;
-  }
-  return false;
+  return (std::abs(p.pdg) == pdg2);
 }
