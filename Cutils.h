@@ -48,7 +48,9 @@ class utils
 {
   public:
     static double getKstar(const particleMC& p1, const particleMC& p2);           // return kstar
+    static double getKstarAsPr(const particleMC& p1, const particleMC& p2);       // return kstar
     static double getKt(const particleMC& p1, const particleMC& p2);              // return kT
+    static double getKtAsPr(const particleMC& p1, const particleMC& p2);          // return kT
 };
 
 #endif

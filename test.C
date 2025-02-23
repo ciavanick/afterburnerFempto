@@ -14,7 +14,7 @@ int pdg2 = pdgPr;
 
 vreader *reader;
 
-void test(bool interact=true, bool coalescence=true, bool noHe=false){
+void test(bool interact=true, int coalescence=-1 /* -1=before int, 0=no caoal, 1=after int*/, bool noHe=false){
   if(fromFile){
     reader = new readerMC();
     reader->openFile("listaMC",true); // true to read a collection
@@ -48,6 +48,9 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
   TH1D *h = new TH1D("h",";k* (GeV/c)",nbins,0,0.2);
   TH1D *h2 = new TH1D("h2",";k* (GeV/c)",nbins,0,0.2);
   TH1D *hb = new TH1D("hb",";k* (GeV/c)",nbins,0,0.2);
+  TH1D *hAsPr = new TH1D("hAsPr",";k* (GeV/c)",nbins,0,0.2);
+  TH1D *h2AsPr = new TH1D("h2AsPr",";k* (GeV/c)",nbins,0,0.2);
+  TH1D *hbAsPr = new TH1D("hbAsPr",";k* (GeV/c)",nbins,0,0.2);
 
   TH1D *hPr = new TH1D("hPr",";p/A (GeV/c)",100,0,5);
   TH1D *hNe = new TH1D("hNe",";p/A (GeV/c)",100,0,5);
@@ -62,6 +65,9 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
   h->SetLineColor(2);
   h2->SetLineColor(1);
   hb->SetLineColor(4);
+  hAsPr->SetLineColor(2);
+  h2AsPr->SetLineColor(1);
+  hbAsPr->SetLineColor(4);
 
   std::vector<particleMC> evPrev[nmix];
 
@@ -74,13 +80,18 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
     } else {
       evPrev[i] = doToyEvent();
     }
-    if(coalescence){
+    if(coalescence < 0){
       coalescer->doCoalAll(evPrev[i]);
     }
 
     if(interact){
       interactor->doInteractAll(evPrev[i]);
     }
+
+    if(coalescence > 0){
+      coalescer->doCoalAll(evPrev[i]);
+    }
+
   }
 
   printf("start running events \n");
@@ -143,6 +154,12 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
           h->Fill(kstar);
           h2->Fill(kstar);
         }
+        double ktAsPr = utils::getKtAsPr(p1,p2);
+        if(fabs(ktAsPr-1) < 0.2) {
+          double kstarAsPr = utils::getKstarAsPr(p1,p2);
+          hAsPr->Fill(kstarAsPr);
+          h2AsPr->Fill(kstarAsPr);
+        }
       }
     }
 
@@ -161,7 +178,7 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
         for(int i2=0; i2 < evPrev[j] .size(); i2++){
           const particleMC& p2 = evPrev[j][i2];
 
-          if(!sel1(p1)){
+          if(!sel2(p2)){
             continue;
           }
 
@@ -174,6 +191,11 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
             double kstar = utils::getKstar(p1,p2);
             hb->Fill(kstar);
           }
+          double ktAsPr = utils::getKtAsPr(p1,p2);
+          if(fabs(ktAsPr-1) < 0.2) {
+            double kstarAsPr = utils::getKstarAsPr(p1,p2);
+            hbAsPr->Fill(kstarAsPr);
+          }
         }
       }
     }
@@ -183,12 +205,18 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
 
   float adjustScaling = h->Integral(nbins/2+1,nbins) / hb->Integral(nbins/2+1,nbins);
   hb->Scale(adjustScaling);
+  float adjustScalingAsPr = hAsPr->Integral(nbins/2+1,nbins) / hbAsPr->Integral(nbins/2+1,nbins);
+  hbAsPr->Scale(adjustScalingAsPr);
 
   h->Sumw2();
   h2->Sumw2();
   h2->Divide(hb);
+  hAsPr->Sumw2();
+  h2AsPr->Sumw2();
+  h2AsPr->Divide(hbAsPr);
 
   hb->Scale(1./adjustScaling); //remove scaling before to store
+  hbAsPr->Scale(1./adjustScalingAsPr); //remove scaling before to store
 
   TCanvas *c = new TCanvas;
   h2->Draw();
@@ -229,6 +257,9 @@ void test(bool interact=true, bool coalescence=true, bool noHe=false){
   h->Write();
   h2->Write();
   hb->Write();
+  hAsPr->Write();
+  h2AsPr->Write();
+  hbAsPr->Write();
   hPr->Write();
   hNe->Write();
   hDe->Write();
