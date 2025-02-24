@@ -42,6 +42,7 @@ public:
 
   particleMC() {}
   particleMC(double px, double py, double pz, double e) : q(px, py, pz, e) {}
+  void print() const;
 };
 
 class utils

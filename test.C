@@ -14,7 +14,7 @@ int pdg2 = pdgPr;
 
 vreader *reader;
 
-void test(bool interact=true, int coalescence=-1 /* -1=before int, 0=no caoal, 1=after int*/, bool noHe=false){
+void test(bool interact=true, int coalescence=1 /* -1=before int, 0=no caoal, 1=after int*/, bool noHe=false){
   if(fromFile){
     reader = new readerMC();
     reader->openFile("listaMC",true); // true to read a collection
@@ -91,7 +91,6 @@ void test(bool interact=true, int coalescence=-1 /* -1=before int, 0=no caoal, 1
     if(coalescence > 0){
       coalescer->doCoalAll(evPrev[i]);
     }
-
   }
 
   printf("start running events \n");
@@ -100,12 +99,16 @@ void test(bool interact=true, int coalescence=-1 /* -1=before int, 0=no caoal, 1
     int lev = i % nmix;
     std::vector<particleMC>& event = fromFile ? readEvent() : doToyEvent();
 
-    if(coalescence){
+    if(coalescence < 0){
       coalescer->doCoalAll(event);
     }
 
     if(interact){
       interactor->doInteractAll(event);
+    }
+
+    if(coalescence > 0){
+      coalescer->doCoalAll(event);
     }
 
     for(int i1=0; i1 < event.size(); i1++){ // same event
@@ -151,6 +154,7 @@ void test(bool interact=true, int coalescence=-1 /* -1=before int, 0=no caoal, 1
         double kt = utils::getKt(p1,p2);
         if(fabs(kt-1) < 0.2) {
           double kstar = utils::getKstar(p1,p2);
+
           h->Fill(kstar);
           h2->Fill(kstar);
         }

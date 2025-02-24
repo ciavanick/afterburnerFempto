@@ -18,6 +18,7 @@ double utils::getKt(const particleMC& p1, const particleMC& p2){
 double utils::getKstarAsPr(const particleMC& p1, const particleMC& p2){
   float m1scaling = 0.938/p1.q.M();
   float m2scaling = 0.938/p2.q.M();
+
   TLorentzVector pSum = p1.q*m1scaling + p2.q*m2scaling;
   double Minv = pSum.M();
   double mass1square = p1.q.M()*p1.q.M();
@@ -32,5 +33,10 @@ double utils::getKtAsPr(const particleMC& p1, const particleMC& p2){
   float m2scaling = 0.938/p2.q.M();
   TLorentzVector pSum = 0.5*(p1.q*m1scaling + p2.q*m2scaling);
   return pSum.Pt();
+}
+//_________________________________________________________________________
+void particleMC::print() const {
+  printf("pdg = %d - mother = %d - charges: Strong = %d, Coloumb = %d - Ndaugthers = %lu\n",pdg, mother, StrongC, ColoumbC, daughters.size());
+  q.Print();
 }
 
