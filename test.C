@@ -4,7 +4,7 @@ bool sel1(const particleMC& p);
 bool sel2(const particleMC& p);
 
 float meson_downscale = 0.1;
-bool fromFile = false;
+bool fromFile = true;
 
 int pdgPr = 2212; // proton
 int pdgDe = 4324; // deuteron
@@ -14,7 +14,7 @@ int pdg2 = pdgPr;
 
 vreader *reader;
 
-void test(bool interact=true, int coalescence=1 /* -1=before int, 0=no caoal, 1=after int*/, bool noHe=false){
+void test(bool interact=true){
   if(fromFile){
     reader = new readerMC();
     reader->openFile("listaMC",true); // true to read a collection
@@ -37,11 +37,6 @@ void test(bool interact=true, int coalescence=1 /* -1=before int, 0=no caoal, 1=
 
   vfempto *interactor= new vfempto;   // simple model box potential
 //  vfempto *interactor= new fempto;      // Lenard-Jones  strong potential
-  vcoal *coalescer = new simpleCoal();
-
-  if(noHe){
-    coalescer->setMassMax(2);
-  }
 
 //  interactor->setParams(2.2E-3, 2.4, 1.44E-3, sourceSize);
 
@@ -80,17 +75,11 @@ void test(bool interact=true, int coalescence=1 /* -1=before int, 0=no caoal, 1=
     } else {
       evPrev[i] = doToyEvent();
     }
-    if(coalescence < 0){
-      coalescer->doCoalAll(evPrev[i]);
-    }
 
     if(interact){
       interactor->doInteractAll(evPrev[i]);
     }
 
-    if(coalescence > 0){
-      coalescer->doCoalAll(evPrev[i]);
-    }
   }
 
   printf("start running events \n");
@@ -99,16 +88,8 @@ void test(bool interact=true, int coalescence=1 /* -1=before int, 0=no caoal, 1=
     int lev = i % nmix;
     std::vector<particleMC>& event = fromFile ? readEvent() : doToyEvent();
 
-    if(coalescence < 0){
-      coalescer->doCoalAll(event);
-    }
-
     if(interact){
       interactor->doInteractAll(event);
-    }
-
-    if(coalescence > 0){
-      coalescer->doCoalAll(event);
     }
 
     for(int i1=0; i1 < event.size(); i1++){ // same event
@@ -257,6 +238,10 @@ void test(bool interact=true, int coalescence=1 /* -1=before int, 0=no caoal, 1=
   c->SetLogy();
   hMass->Draw();
 
+  new TCanvas;
+  interactor->getHistoGroup()->Draw();
+  interactor->getHistoMerge()->Draw("SAME");
+
   TFile *fout = new TFile("resNew.root","RECREATE");
   h->Write();
   h2->Write();
@@ -269,6 +254,8 @@ void test(bool interact=true, int coalescence=1 /* -1=before int, 0=no caoal, 1=
   hDe->Write();
   hHe->Write();
   hMass->Write();
+  interactor->getHistoGroup()->Write();
+  interactor->getHistoMerge()->Write();
   fout->Close();
 }
 
