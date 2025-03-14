@@ -1,12 +1,15 @@
 BIN=./bin
 LIB=./lib
 
+# for maxOS
+# extra_options=-std=c++17
+
 # the compiler: gcc for C program, define as g++ for C++
 CC = g++
 
 # compiler, linker, ... flags:
 CC_FLAGS := $(shell root-config --cflags)
-CC_FLAGS := -fPIC
+CC_FLAGS := -fPIC $(extra_options)
 CC_FLAGS_LIB:= $CC_FLAGS
 CC_FLAGS_LIB:= -shared -s
 LDFLAGS := $(shell root-config --ldflags) -shared

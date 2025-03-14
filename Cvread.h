@@ -29,8 +29,8 @@ class vreader
     TChain *mTree = nullptr;
     int mIEvent=-1;
     bool mIsOpened = false;
-    float mMinEta = - 2;
-    float mMaxEta = 2;
+    float mMinEta = -3;
+    float mMaxEta = 3;
     std::vector<particleMC> mParticles;
 
   private:

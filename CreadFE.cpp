@@ -5,19 +5,43 @@ bool readerFE::LoadEvent(int iev) {
     return 1;
   }
 
-  for(int i=0; i < mNtrack; i++){
+  int ntrack = mArr->GetEntriesFast();
 
-    // all stable particles in the tree
-    int charge = TDatabasePDG::Instance()->GetParticle(mPID[i])->Charge();
+  for(int i=0; i < ntrack; i++){
+    TParticle *p = (TParticle*) mArr->At(i);
 
-    if(charge % 3){ // no fractional charges
+    int pdg = p->GetPdgCode();
+    if(pdg == 2212000){
+      pdg = 2212;
+    }
+    if(pdg == 2112000){
+      pdg = 2112;
+    }
+    if(pdg == -2212000){
+      pdg = -2212;
+    }
+    if(pdg == -2112000){
+      pdg = -2112;
+    }
+    if(pdg == 1000010020 || pdg == -1000010020){ //deuteron
+      continue;
+    }
+    if(! TDatabasePDG::Instance()->GetParticle(pdg)){
+      printf("%d doesn't exist\n",pdg);
       continue;
     }
 
-    double energy = TDatabasePDG::Instance()->GetParticle(mPID[i])->Mass();
-    energy = sqrt(energy*energy + mPx[i]*mPx[i] + mPy[i]*mPy[i] + mPz[i]*mPz[i]);
+    // all stable particles in the tree
+    int charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge();
 
-    particleMC part(mPx[i],mPy[i],mPz[i],energy);
+    double px = p->Px();
+    double py = p->Py();
+    double pz = p->Pz();
+
+    double energy = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
+    energy = sqrt(energy*energy + px*px + py*py + pz*pz);
+
+    particleMC part(px,py,pz,energy);
 
     //applying mMinEta, mMaxEta cuts
     if(part.q.Eta() < mMinEta || part.q.Eta() > mMaxEta){
@@ -25,7 +49,7 @@ bool readerFE::LoadEvent(int iev) {
     }
 
     // add particle
-    part.pdg = mPID[i];
+    part.pdg = pdg;
     part.mother = -1;
     if(part.pdg > 999){
       part.StrongC = 1;
@@ -50,9 +74,7 @@ void readerFE::initTree(){
     return;
   }
 
-  mTree->SetBranchAddress("ntrack",&mNtrack);
-  mTree->SetBranchAddress("PID",mPID);
-  mTree->SetBranchAddress("px",mPx);
-  mTree->SetBranchAddress("py",mPy);
-  mTree->SetBranchAddress("pz",mPz);
+  mArr = new TClonesArray("TParticle");
+
+  mTree->SetBranchAddress("Particles",&mArr);
 }

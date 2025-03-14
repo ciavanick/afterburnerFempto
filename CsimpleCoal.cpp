@@ -1,4 +1,5 @@
 #include "CsimpleCoal.h"
+#include "TRandom.h"
 
 bool simpleCoal::docoal(const particleMC& p1, const particleMC& p2){ // perform coalescence
   float kstar = utils::getKstar(p1,p2);
@@ -20,9 +21,9 @@ bool simpleCoal::docoal(const particleMC& p1, const particleMC& p2){ // perform 
   int charge = std::abs(p1.ColoumbC + p2.ColoumbC);
   float mass = p1.q.M() + p2.q.M();
 
-  if(kstar < 0.05){
-//    printf("%d %d \n",p1.pdg,p2.pdg);
+  float prob = TMath::Exp(-kstar/0.05);
 
+  if(gRandom->Rndm() < prob){
     return true;
   }
 
