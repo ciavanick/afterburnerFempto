@@ -27,7 +27,7 @@ OBJ_FILES := $(addprefix ./,$(notdir $(CPP_FILES:.cpp=.o)))
 OBJ_MAIN=$(SRC_MAIN:.C=.o)
 
 # the build target executable:
-MAIN = $(BIN)/coalroot.exe
+MAIN = $(BIN)/coalroot
 LIBRARY = $(LIB)/coal.so
 
 # build the executable (remove LinkDef at the end to avoid conflict in the next "make" call)

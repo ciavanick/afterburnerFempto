@@ -12,6 +12,7 @@
 #pragma link C++ class utils++;
 #pragma link C++ class vfempto++;
 #pragma link C++ class fempto++;
+#pragma link C++ class femptoSource++;
 #pragma link C++ class vreader++;
 #pragma link C++ class readerMC++;
 #pragma link C++ class readerFE++;

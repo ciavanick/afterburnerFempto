@@ -1,7 +1,17 @@
 #include "Cvfempto.h"
 #include "TRandom.h"
 
+float vfempto::mStrong = 2.2E-3;     // attractive potential
+float vfempto::mStrongR = 2.4;        // radius of box potential
+float vfempto::mCoulomb = 1.44E-3;
+float vfempto::mSourceRadius = 0;
+float vfempto::mSpinCoalFactor = 3./8;
+
 void vfempto::doInteractAll(std::vector<particleMC>& part){
+  if(! mIsInitialized){
+    init();
+  }
+
   // build pairs only if both charged
   std::vector<int> groupBelongTo;
   std::vector<std::pair<int,int>> intPairs;
@@ -271,12 +281,12 @@ void vfempto::doInteractAll(std::vector<particleMC>& part){
   }
 }
 //_________________________________________________________________________
-float vfempto::getCoalProb(const particleMC& p1, const particleMC& p2) const {
+float vfempto::getCoalProb(const particleMC& p1, const particleMC& p2) {
   double kstar = utils::getKstar(p1,p2);
   return TMath::Exp(-kstar/0.05);
 }
 //_________________________________________________________________________
-bool vfempto::isCoalescence(const particleMC& p1, const particleMC& p2) const {
+bool vfempto::isCoalescence(const particleMC& p1, const particleMC& p2) {
   if(p1.pdg * p2.pdg < 0){ // baryon + antibaryon
     return false;
   }
