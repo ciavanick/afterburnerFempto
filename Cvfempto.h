@@ -28,7 +28,7 @@ class vfempto
     static float mSpinCoalFactor;
     bool mIsInitialized = false;
 
-    particleMC merge(const particleMC& p1, const particleMC& p2);
+    particleMC& merge(const particleMC& p1, const particleMC& p2);
 
   private:
     TH1F *mHsizeGroup = nullptr;
