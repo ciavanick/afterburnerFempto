@@ -76,7 +76,17 @@ void particleMC::print() const {
 }
 //_________________________________________________________________________
 void particleCand::addOption(double px, double py, double pz, int pdg){
-  double mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
+  double mass;
+  uint pdgAbs = std::abs(pdg);
+  if(pdgAbs < 4000){
+    mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
+  } else { // nuclei (as mapped from us) are not known
+    int A = pdgAbs / 2000;
+    int Z = (pdgAbs - A * 2100) / 100;
+    int N = A - Z;
+    mass = TDatabasePDG::Instance()->GetParticle(2212)->Mass() * Z;
+    mass += TDatabasePDG::Instance()->GetParticle(2212)->Mass() * N;
+  }
   double energy = sqrt(px*px + py*py + pz*pz + mass*mass);
   pdgOptions.push_back(pdg);
   q.emplace_back(px,py,pz,energy);
