@@ -169,7 +169,7 @@ void vfempto::doInteractAll(std::vector<particleMC>& part){
       if(A == 2 && npro == 1){ // detueron
         particleMC& p1 = part[mergeable[0]];
         particleMC& p2 = part[mergeable[1]];
-        particleMC& merged = merge(p1,p2);
+        particleMC merged = merge(p1,p2);
 
         p1.daughters.push_back(newpart);
         p2.daughters.push_back(newpart);
@@ -180,8 +180,8 @@ void vfempto::doInteractAll(std::vector<particleMC>& part){
         particleMC& p1 = part[mergeable[0]];
         particleMC& p2 = part[mergeable[1]];
         particleMC& p3 = part[mergeable[2]];
-        particleMC& temp = merge(p1,p2);
-        particleMC& merged = merge(temp,p3);
+        particleMC temp = merge(p1,p2);
+        particleMC merged = merge(temp,p3);
 
         p1.daughters.push_back(newpart);
         p2.daughters.push_back(newpart);
@@ -196,9 +196,9 @@ void vfempto::doInteractAll(std::vector<particleMC>& part){
           particleMC& p3 = part[mergeable[2]];
           particleMC& p4 = part[mergeable[3]];
 
-          particleMC& temp = merge(p1,p2);
-          particleMC& temp2 = merge(temp,p3);
-          particleMC& merged = merge(temp2,p4);
+          particleMC temp = merge(p1,p2);
+          particleMC temp2 = merge(temp,p3);
+          particleMC merged = merge(temp2,p4);
 
           p1.daughters.push_back(newpart);
           p2.daughters.push_back(newpart);
@@ -232,8 +232,8 @@ void vfempto::doInteractAll(std::vector<particleMC>& part){
           particleMC& p1 = part[ip];
           particleMC& p2 = part[in[0]];
           particleMC& p3 = part[in[1]];
-          particleMC& temp = merge(p1,p2);
-          particleMC& merged = merge(temp,p3);
+          particleMC temp = merge(p1,p2);
+          particleMC merged = merge(temp,p3);
 
           p1.daughters.push_back(newpart);
           p2.daughters.push_back(newpart);
@@ -246,19 +246,19 @@ void vfempto::doInteractAll(std::vector<particleMC>& part){
           int ip[2];
           std::vector<std::pair<int,float>> ind;
           for(int iel=0; iel < 4; iel++){
-            ind.push_back(std::make_pair(iel,gRandom->Rndm()));
+            ind.push_back(std::make_pair(mergeable[iel],gRandom->Rndm()));
           }
           std::sort(ind.begin(), ind.end(),  [](auto &left, auto &right) {return left.second < right.second;});
 
           int n_pro=0;
           for(int iel=0; iel < 4; iel++){
-            particleMC& p = part[iel];
+            particleMC& p = part[ind[iel].first];
             if(std::abs(p.pdg) == 2112){
-              in = iel;
+              in = ind[iel].first;
               continue;
             }
             if(std::abs(p.pdg) == 2212 && n_pro < 2){
-              ip[n_pro] = iel;
+              ip[n_pro] = ind[iel].first;
               n_pro++;
             }
           }
@@ -266,8 +266,8 @@ void vfempto::doInteractAll(std::vector<particleMC>& part){
           particleMC& p1 = part[in];
           particleMC& p2 = part[ip[0]];
           particleMC& p3 = part[ip[1]];
-          particleMC& temp = merge(p1,p2);
-          particleMC& merged = merge(temp,p3);
+          particleMC temp = merge(p1,p2);
+          particleMC merged = merge(temp,p3);
 
           p1.daughters.push_back(newpart);
           p2.daughters.push_back(newpart);
@@ -407,9 +407,8 @@ double vfempto::doInteract(particleMC& p1, particleMC& p2, float chargeColoumb, 
   return ptEx;
 }
 //_________________________________________________________________________
-particleMC& vfempto::merge(const particleMC& p1, const particleMC& p2){
-  particleMC *pointerSum = new particleMC;
-  particleMC& pSum = *pointerSum;
+particleMC vfempto::merge(const particleMC& p1, const particleMC& p2){
+  particleMC pSum;
   pSum.q = p1.q + p2.q;
   int pdgSum = p1.pdg + p2.pdg;
   double mass = p1.q.M() + p2.q.M();

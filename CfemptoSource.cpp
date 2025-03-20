@@ -16,6 +16,9 @@ void femptoSource::setCharges(float cS, float cC){
 }
 //_________________________________________________________________________
 void femptoSource::setKstar(float kstar) {
+  if(! mIsInitialized){
+    init();
+  }
   if(mSourceRadius < 0){
     static const float factor = sqrt(3*0.5) * HCUT;
     float radius = factor/kstar;
@@ -27,6 +30,7 @@ void femptoSource::setKstar(float kstar) {
     mSourceKin->SetParameter(2, kstar);
     mCoalescenceRe->SetParameter(2, kstar);
     mCoalescenceIm->SetParameter(2, kstar);
+    setSourceRadius(mSourceRadius); // to trigger new normalization
   }
 
 }
@@ -63,6 +67,9 @@ void femptoSource::setSourceRadius(float radius) {
   mSource2int->SetParameter(0,1);
 
   mMaxIntRange = TMath::Max(20., double(radius*3));
+  if(mMaxIntRange > 100){
+    mMaxIntRange = 100;
+  }
 
   double err;
   double norm = 1./sqrt(mSource2int->IntegralOneDim(0,mMaxIntRange,1E-8,1E-8,err));
@@ -273,11 +280,13 @@ void femptoSource::init(){
   mCoalescenceIm->SetParameter(6, mK2);
   mCoalescenceIm->SetParameter(7, mNormRight);
 
+  vfempto::init();
+
   if(mSourceRadius >= 0){
     setSourceRadius(mSourceRadius);
+  } else {
+    setSourceRadius(0);
   }
-
-  vfempto::init();
 }
 //_________________________________________________________________________
 float femptoSource::calcProb(){
@@ -291,7 +300,7 @@ float femptoSource::calcProb(){
 }
 //_________________________________________________________________________
 float femptoSource::getCoalProb(const particleMC& p1, const particleMC& p2) {
-  double kstar = utils::getKstar(p1,p2);
+  double kstar = utils::getKstar(p1,p2) * 1E3;
   setKstar(kstar);
 
   return calcProb();
