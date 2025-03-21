@@ -20,12 +20,16 @@ void femptoSource::setKstar(float kstar) {
     init();
   }
   if(mSourceRadius < 0){
+    float radiusSource = std::abs(mSourceRadius);
     static const float factor = sqrt(3*0.5) * HCUT;
-    float radius = factor/kstar;
+    float radiusWave = factor/kstar;
+    float radius = sqrt(radiusWave*radiusWave + radiusSource*radiusSource);
+    float kstarWave = factor/radius;
+    float kstarEff = sqrt(kstar*kstar - kstarWave*kstarWave);
     setSourceRadius(-radius);
-    mSourceKin->SetParameter(2, 0);
-    mCoalescenceRe->SetParameter(2, 0);
-    mCoalescenceIm->SetParameter(2, 0);
+    mSourceKin->SetParameter(2, kstarEff);
+    mCoalescenceRe->SetParameter(2, kstarEff);
+    mCoalescenceIm->SetParameter(2, kstarEff);
   } else {
     mSourceKin->SetParameter(2, kstar);
     mCoalescenceRe->SetParameter(2, kstar);
@@ -42,27 +46,17 @@ void femptoSource::setSourceRadius(float radius) {
   if(radius > 0){
     mSourceRadius = radius;
   } else {
-    mSourceRadius = -1;
+//    mSourceRadius = radius;
     radius *= -1;
   }
 
-  if(radius > 0){
-    mSource2int->SetParameter(1,radius);
-    mSource->SetParameter(1,radius);
-    mUSource->SetParameter(1,radius);
-    mSourceKin->SetParameter(1,radius);
-    mSourceV->SetParameter(1,radius);
-    mCoalescenceRe->SetParameter(1,radius);
-    mCoalescenceIm->SetParameter(1,radius);
-  } else {
-    mSource2int->SetParameter(1,0);
-    mSource->SetParameter(1,0);
-    mUSource->SetParameter(1,0);
-    mSourceKin->SetParameter(1,0);
-    mSourceV->SetParameter(1,0);
-    mCoalescenceRe->SetParameter(1,0);
-    mCoalescenceIm->SetParameter(1,0);
-  }
+  mSource2int->SetParameter(1,radius);
+  mSource->SetParameter(1,radius);
+  mUSource->SetParameter(1,radius);
+  mSourceKin->SetParameter(1,radius);
+  mSourceV->SetParameter(1,radius);
+  mCoalescenceRe->SetParameter(1,radius);
+  mCoalescenceIm->SetParameter(1,radius);
 
   mSource2int->SetParameter(0,1);
 
@@ -94,7 +88,7 @@ double femptoSource::coalescenceIm(double *x,double *pm){
   double r = x[0];
   double pDeu[5] = {pm[3], pm[4], pm[5], pm[6], pm[7]};
 
-  return waveDeuteron(x,pm) * sourceSin(x,pm) * 4 * TMath::Pi() * r * r;
+  return waveDeuteron(x,pDeu) * sourceSin(x,pm) * 4 * TMath::Pi() * r * r;
 }
 //_________________________________________________________________________
 double femptoSource::uDeuteron(double *x,double *pm){
@@ -300,14 +294,14 @@ float femptoSource::calcProb(){
 }
 //_________________________________________________________________________
 float femptoSource::getCoalProb(const particleMC& p1, const particleMC& p2) {
-  double kstar = utils::getKstar(p1,p2) * 1E3;
+  double kstar = utils::getKstar(p1,p2) * 1E3; // to MeV
   setKstar(kstar);
 
   return calcProb();
 }
 //_________________________________________________________________________
 double femptoSource::doInteract(particleMC& p1, particleMC& p2, float chargeColoumb, float chargeStrong, float sumRadii, float *pos, float *posLab){
-  double kstar = utils::getKstar(p1,p2);
+  double kstar = utils::getKstar(p1,p2) * 1E3; // to MeV
   setKstar(kstar);
 
   TLorentzVector pSum = p1.q + p2.q;
@@ -324,7 +318,7 @@ double femptoSource::doInteract(particleMC& p1, particleMC& p2, float chargeColo
     coalProb = calcProb();
   }
 
-  double momFinal = getKstarFinal(coalProb);
+  double momFinal = getKstarFinal(coalProb) * 1E-3;
   float scaling = momFinal / p1.q.P();
 
   double m1 = p1.q.M();

@@ -8,7 +8,7 @@
 class femptoSource : public vfempto
 {
   public:
-    femptoSource() { setParams(33.7, 2.1, 1.44, -1); } // here we work with MeV (Rsource=-1 means -> wave function defined by setting Rsource to match K.E.)
+    femptoSource() { setParams(33.7, 2.1, 1.44, -2); } // here we work with MeV (Rsource=-1 means -> wave function defined by setting Rsource to match K.E.)
     double doInteract(particleMC& p1, particleMC& p2, float chargeColoumb, float chargeStrong, float sumRadii = 0, float *pos=nullptr, float *posLab=nullptr); // perform interaction and return momentum exchanged
     virtual float getCoalProb(const particleMC& p1, const particleMC& p2);
     float calcProb();
