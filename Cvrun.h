@@ -17,11 +17,15 @@ class vrun
     void init();
 //    void setEvent(your custom input);
     void setEvent(const std::vector<particleMC>& vect);     // to be defined for your special input but then it should be mapped on particleCand
+    void setIDName(const TString& name);
     virtual void process();
     virtual void finalize();
     virtual void write();
 
     void selectPDG(int pdg1, int pdg2) { mPDG1 = pdg1, mPDG2 = pdg2, mIsSamePart = (pdg1 == pdg2); }
+
+    virtual TH1D* getKstarSE();
+    virtual TH1D* getKstarME();
 
   protected:
     std::vector<particleCand> mVect;
@@ -30,10 +34,15 @@ class vrun
     virtual int selectP1(const particleCand& p);
     virtual int selectP2(const particleCand& p);
   private:
+    TString mName = "";
     int mNmix;       // number of mixed events, max is MAXMIXEDEVENTS
     std::vector<particleCand> mEvPrev[MAXMIXEDEVENTS];
     TH2D *mHkstarSE;
     TH2D *mHkstarME;
+    TH1D *mKstarSE = nullptr; //k* distribution of same event pairs
+    TH1D *mKstarME = nullptr; //k* distribution of mixed events pairs
+    TH1D *mKtSE; //kt distribution of same event pairs
+    TH1D *mKtME; //kt distribution of mixed events pairs
 
     int mPDG1 = 2212;
     int mPDG2 = 2212;
