@@ -66,6 +66,7 @@ class utils
     static double getKstarAsPr(const particleCand& p1, const particleCand& p2, int iPdg);       // return kstar
     static double getKt(const particleCand& p1, const particleCand& p2, int iPdg);              // return kT
     static double getKtAsPr(const particleCand& p1, const particleCand& p2, int iPdg);          // return kT
+    static double getMass(int pdg);
 };
 
 #endif

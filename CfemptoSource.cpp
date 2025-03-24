@@ -294,6 +294,12 @@ float femptoSource::calcProb(){
 }
 //_________________________________________________________________________
 float femptoSource::getCoalProb(const particleMC& p1, const particleMC& p2) {
+  if(p1.pdg * p2.pdg < 0){ // baryon-antibaryon cannot do coalescence
+    return 0;
+  }
+  if(p1.pdg == p2.pdg){ // identical particle cannot do coalescence
+    return 0;
+  }
   double kstar = utils::getKstar(p1,p2) * 1E3; // to MeV
   setKstar(kstar);
 

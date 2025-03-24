@@ -1,5 +1,35 @@
 #include "Cutils.h"
 
+double utils::getMass(int pdg){
+  double mass = 0;
+  const double bindingDe = 2.22;
+  const double bindingTr = 8.482;
+  const double bindingHe3 = 7.714;
+  const double bindingHe4 = 28.3;
+
+  uint pdgAbs = std::abs(pdg);
+  if(pdgAbs < 4000){
+    mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
+  } else { // nuclei (as mapped from us) are not known
+    int A = pdgAbs / 2000;
+    int Z = (pdgAbs - A * 2100) / 100;
+    int N = A - Z;
+    mass = TDatabasePDG::Instance()->GetParticle(2212)->Mass() * Z;
+    mass += TDatabasePDG::Instance()->GetParticle(2212)->Mass() * N;
+
+    if(A == 2 && Z == 1){
+      mass -= bindingDe;
+    } else if(A == 3 && Z == 1) {
+      mass -= bindingTr;
+    } else if(A == 3 && Z == 2) {
+      mass -= bindingHe3;
+    } else if(A == 4 && Z == 2) {
+      mass -= bindingHe4;
+    }
+  }
+  return mass;
+}
+//_________________________________________________________________________
 double utils::getKstar(const particleCand& p1, const particleCand& p2, int iPdg){
   TLorentzVector pSum = p1.q[iPdg] + p2.q[iPdg];
   double Minv = pSum.M();
@@ -21,8 +51,8 @@ double utils::getKstarAsPr(const particleCand& p1, const particleCand& p2, int i
 
   TLorentzVector pSum = p1.q[iPdg]*m1scaling + p2.q[iPdg]*m2scaling;
   double Minv = pSum.M();
-  double mass1square = p1.q[iPdg].M()*p1.q[iPdg].M();
-  double mass2square = p2.q[iPdg].M()*p2.q[iPdg].M();
+  double mass1square = p1.q[iPdg].M()*p1.q[iPdg].M()*m1scaling*m1scaling;
+  double mass2square = p2.q[iPdg].M()*p2.q[iPdg].M()*m2scaling*m2scaling;
   double A = Minv*Minv - mass1square - mass2square;
 
   return sqrt(A*A - 4 * mass1square * mass2square) * 0.5 / Minv;
@@ -76,17 +106,8 @@ void particleMC::print() const {
 }
 //_________________________________________________________________________
 void particleCand::addOption(double px, double py, double pz, int pdg){
-  double mass;
-  uint pdgAbs = std::abs(pdg);
-  if(pdgAbs < 4000){
-    mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
-  } else { // nuclei (as mapped from us) are not known
-    int A = pdgAbs / 2000;
-    int Z = (pdgAbs - A * 2100) / 100;
-    int N = A - Z;
-    mass = TDatabasePDG::Instance()->GetParticle(2212)->Mass() * Z;
-    mass += TDatabasePDG::Instance()->GetParticle(2212)->Mass() * N;
-  }
+  double mass = utils::getMass(pdg);
+
   double energy = sqrt(px*px + py*py + pz*pz + mass*mass);
   pdgOptions.push_back(pdg);
   q.emplace_back(px,py,pz,energy);
