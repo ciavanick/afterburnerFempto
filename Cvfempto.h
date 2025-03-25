@@ -10,7 +10,7 @@ class vfempto
     virtual double doInteract(particleMC& p1, particleMC& p2, float chargeColoumb, float chargeStrong, float sumRadii = 0, float *pos=nullptr, float *posLab=nullptr); // perform interaction and return momentum exchanged
     bool isCoalescence(const particleMC& p1, const particleMC& p2);
     virtual float getCoalProb(const particleMC& p1, const particleMC& p2);
-    virtual void doInteractAll(std::vector<particleMC>& part);
+    virtual void doInteractAll(std::vector<particleMC>& part, bool doScattering = true, bool doCoal = true);
     virtual void init() { mIsInitialized = true; };
 
     static void setParams(float strong=2.2E-3, float strongR=2.4, float coloumb=1.44E-3, float sourceRadius=0, float spinFact=3./8) { mStrong = strong, mStrongR = strongR, mCoulomb = coloumb, mSourceRadius = sourceRadius, mSpinCoalFactor = spinFact; }

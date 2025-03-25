@@ -7,7 +7,7 @@ float vfempto::mCoulomb = 1.44E-3;
 float vfempto::mSourceRadius = 0;
 float vfempto::mSpinCoalFactor = 3./8;
 
-void vfempto::doInteractAll(std::vector<particleMC>& part){
+void vfempto::doInteractAll(std::vector<particleMC>& part, bool doScattering, bool doCoal){
   if(! mIsInitialized){
     init();
   }
@@ -137,9 +137,15 @@ void vfempto::doInteractAll(std::vector<particleMC>& part){
         // ------------------------------
 
         // interact
-        doInteract(original1,original2,original1.ColoumbC*original2.ColoumbC,original1.StrongC*original2.StrongC,0);
+        if(doScattering){
+          doInteract(original1,original2,original1.ColoumbC*original2.ColoumbC,original1.StrongC*original2.StrongC,0);
+        }
         // ------------------------------
       }
+    }
+
+    if(! doCoal){
+      continue;
     }
 
     // do coalescence for marked clusters
