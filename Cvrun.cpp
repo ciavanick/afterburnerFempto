@@ -65,8 +65,8 @@ void vrun::process(){
       if(ipdg2 < 0){
         continue;
       }
-      double kt = utils::getKt(p1,p2,ipdg1);
-      double kstar = utils::getKstar(p1,p2,ipdg2);
+      double kt = utils::getKt(p1,p2,ipdg1,ipdg2);
+      double kstar = utils::getKstar(p1,p2,ipdg1,ipdg2);
 
       mHkstarSE->Fill(kt, kstar);
     }
@@ -93,8 +93,8 @@ void vrun::process(){
              continue;
            }
 
-           double kt = utils::getKt(p1,p2,ipdg1);
-           double kstar = utils::getKstar(p1,p2,ipdg2);
+           double kt = utils::getKt(p1,p2,ipdg1,ipdg2);
+           double kstar = utils::getKstar(p1,p2,ipdg1,ipdg2);
 
            mHkstarME->Fill(kt, kstar);
         }
