@@ -24,8 +24,8 @@ class vrun
 
     void selectPDG(int pdg1, int pdg2) { mPDG1 = pdg1, mPDG2 = pdg2, mIsSamePart = (pdg1 == pdg2); }
 
-    virtual TH1D* getKstarSE();
-    virtual TH1D* getKstarME();
+    virtual TH2D* getKstarSE();
+    virtual TH2D* getKstarME();
 
   protected:
     std::vector<particleCand> mVect;
@@ -39,11 +39,7 @@ class vrun
     std::vector<particleCand> mEvPrev[MAXMIXEDEVENTS];
     TH2D *mHkstarSE;
     TH2D *mHkstarME;
-    TH1D *mKstarSE = nullptr; //k* distribution of same event pairs
-    TH1D *mKstarME = nullptr; //k* distribution of mixed events pairs
-    TH1D *mKtSE; //kt distribution of same event pairs
-    TH1D *mKtME; //kt distribution of mixed events pairs
-
+    
     int mPDG1 = 2212;
     int mPDG2 = 2212;
     bool mIsSamePart = true;

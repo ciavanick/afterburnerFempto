@@ -21,10 +21,6 @@ void vrun::init(){
 void vrun::initHistos(){
     mHkstarSE = new TH2D("mHkstarSE" + mName,"Same Event;k_{T} (GeV/c);k* (MeV/c);N(k*)",10,0,2,100,0,1);
     mHkstarME = new TH2D("mHkstarME" + mName,"Mixed Events;k_{T} (GeV/c);k* (MeV/c);N(k*)",10,0,2,100,0,1);
-    mKstarSE = new TH1D("mKstarSE" + mName, "Same Event;k* (MeV/c);N(k*)", 100, 0, 1);
-    mKstarME = new TH1D("mKstarME" + mName, "Mixed Events;k* (MeV/c);N(k*)", 100, 0, 1);
-    mKtSE = new TH1D("mKtSE" + mName, "Same Event;k_{T} (GeV/c);N(k_{T})",10, 0, 2);
-    mKtME = new TH1D("mKtME" + mName, "Mixed Events;k_{T} (GeV/c);N(k_{T})",10, 0, 2);
 }
 //_________________________________________________________________________
 void vrun::finalize(){
@@ -39,10 +35,6 @@ void vrun::write(){
   gFile->cd("vrun" + mName);
   mHkstarSE->Write();
   mHkstarME->Write();
-  mKstarSE->Write();
-  mKstarME->Write();
-  mKtSE->Write();
-  mKtME->Write();
   gFile->cd();
 }
 //_________________________________________________________________________
@@ -77,8 +69,6 @@ void vrun::process(){
       double kstar = utils::getKstar(p1,p2,ipdg2);
 
       mHkstarSE->Fill(kt, kstar);
-      mKstarSE->Fill(kstar);
-      mKtSE->Fill(kt);
     }
   }
 
@@ -107,8 +97,6 @@ void vrun::process(){
            double kstar = utils::getKstar(p1,p2,ipdg2);
 
            mHkstarME->Fill(kt, kstar);
-           mKstarME->Fill(kstar);
-           mKtME->Fill(kt);
         }
       }
     }
@@ -138,9 +126,9 @@ int vrun::selectP2(const particleCand& p){
   return -1;
 }
 //_________________________________________________________________________
-TH1D* vrun::getKstarSE(){
-  return mKstarSE;
+TH2D* vrun::getKstarSE(){
+  return mHkstarSE;
 }
-TH1D* vrun::getKstarME(){
-  return mKstarME;
+TH2D* vrun::getKstarME(){
+  return mHkstarME;
 }
