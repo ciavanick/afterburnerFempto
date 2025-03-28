@@ -100,6 +100,24 @@ double utils::getKtAsPr(const particleMC& p1, const particleMC& p2){
   return pSum.Pt();
 }
 //_________________________________________________________________________
+double utils::getDPhi(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2, double rangeMin, double rangeMax, double shift){
+  double phi1 = p1.q[iPdg1].Phi();
+  double phi2 = p2.q[iPdg2].Phi();
+
+  double dPhi = phi1 - phi2;
+  if(dPhi < rangeMin) dPhi = dPhi + shift;
+  if(dPhi > rangeMax) dPhi = dPhi - shift;
+
+  return dPhi;
+}
+double utils::getDEta(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2){
+  double eta1 = p1.q[iPdg1].Eta();
+  double eta2 = p2.q[iPdg2].Eta();
+
+  double dEta = eta1 - eta2;
+  return dEta;
+}
+//_________________________________________________________________________
 void particleMC::print() const {
   printf("pdg = %d - mother = %d - charges: Strong = %d, Coloumb = %d - Ndaugthers = %lu\n",pdg, mother, StrongC, ColoumbC, daughters.size());
   q.Print();

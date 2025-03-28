@@ -67,6 +67,8 @@ class utils
     static double getKt(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2);              // return kT
     static double getKtAsPr(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2);          // return kT
     static double getMass(int pdg);
+    static double getDPhi(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2, double rangeMin, double rangeMax, double shift); //return phi
+    static double getDEta(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2);                                                 //return eta
 };
 
 #endif

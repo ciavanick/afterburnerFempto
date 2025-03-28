@@ -26,6 +26,8 @@ class vrun
 
     virtual TH2D* getKstarSE();
     virtual TH2D* getKstarME();
+    virtual TH2D* getDPhiDEtaSE();
+    virtual TH2D* getDPhiDEtaME();
 
   protected:
     std::vector<particleCand> mVect;
@@ -39,7 +41,9 @@ class vrun
     std::vector<particleCand> mEvPrev[MAXMIXEDEVENTS];
     TH2D *mHkstarSE;
     TH2D *mHkstarME;
-    
+    TH2D *mDPhiDEtaSE;
+    TH2D *mDPhiDEtaME;
+
     int mPDG1 = 2212;
     int mPDG2 = 2212;
     bool mIsSamePart = true;
