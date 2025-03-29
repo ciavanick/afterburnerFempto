@@ -1,10 +1,12 @@
 #include "CfemptoSource.h"
 #include "TRandom.h"
 
-float femptoSource::getKstarFinal(float coalProb) const {
-  float Efin = TMath::Max(0., (kineticSource() + potentialSource() - EBOUND*coalProb)/(1 - coalProb));
+float femptoSource::getKstarFinal(float coalProb, float massRed, float boundE) const {
+  float Efin = TMath::Max(float(0.), (kineticSource() + potentialSource() - boundE*coalProb)/(1 - coalProb));
 
-  return sqrt(Efin*2*MRED);
+//  printf("K=%f - V=%f E=%f -> k*=%f\n",kineticSource(),potentialSource(),Efin,sqrt(Efin*2*massRed));
+
+  return sqrt(Efin*2*massRed);
 }
 //_________________________________________________________________________
 void femptoSource::setCharges(float cS, float cC){
@@ -15,12 +17,12 @@ void femptoSource::setCharges(float cS, float cC){
   mDeuteronV->SetParameter(6,cC);
 }
 //_________________________________________________________________________
-void femptoSource::setKstar(float kstar) {
+void femptoSource::setKstar(float kstar, float kt) {
   if(! mIsInitialized){
     init();
   }
   if(mSourceRadius < 0){
-    float radiusSource = std::abs(mSourceRadius);
+    float radiusSource = std::abs(mSourceRadius/kt);
     static const float factor = sqrt(3*0.5) * HCUT;
     float radiusWave = factor/kstar;
     float radius = sqrt(radiusWave*radiusWave + radiusSource*radiusSource);
@@ -34,7 +36,7 @@ void femptoSource::setKstar(float kstar) {
     mSourceKin->SetParameter(2, kstar);
     mCoalescenceRe->SetParameter(2, kstar);
     mCoalescenceIm->SetParameter(2, kstar);
-    setSourceRadius(mSourceRadius); // to trigger new normalization
+    setSourceRadius(mSourceRadius/kt); // to trigger new normalization
   }
 
 }
@@ -164,7 +166,8 @@ double femptoSource::sourceCos(double *x,double *pm){
     double radius = pm[1];
     double kstar = pm[2];
 
-    return norm * TMath::Exp(-r*r*0.5/(radius*radius)) * cos(kstar*r/HCUT);
+//    return norm * TMath::Exp(-r*r*0.5/(radius*radius)) * cos(kstar*r/HCUT);
+    return norm * TMath::Exp(-r*r*0.5/(radius*radius)) * sin(kstar*r/HCUT) * HCUT/(kstar*r);
 }
 //_________________________________________________________________________
 double femptoSource::sourceSin(double *x,double *pm){
@@ -173,7 +176,8 @@ double femptoSource::sourceSin(double *x,double *pm){
     double radius = pm[1];
     double kstar = pm[2];
 
-    return norm * TMath::Exp(-r*r*0.5/(radius*radius)) * sin(kstar*r/HCUT);
+//    return norm * TMath::Exp(-r*r*0.5/(radius*radius)) * sin(kstar*r/HCUT);
+    return 0;
 }
 //_________________________________________________________________________
 double femptoSource::usource(double *x,double *pm){
@@ -301,14 +305,17 @@ float femptoSource::getCoalProb(const particleMC& p1, const particleMC& p2) {
     return 0;
   }
   double kstar = utils::getKstar(p1,p2) * 1E3; // to MeV
-  setKstar(kstar);
+  double kt = utils::getKt(p1,p2); // in GeV
+
+  setKstar(kstar,kt);
 
   return calcProb();
 }
 //_________________________________________________________________________
 double femptoSource::doInteract(particleMC& p1, particleMC& p2, float chargeColoumb, float chargeStrong, float sumRadii, float *pos, float *posLab){
   double kstar = utils::getKstar(p1,p2) * 1E3; // to MeV
-  setKstar(kstar);
+  double kt = utils::getKt(p1,p2);
+  setKstar(kstar,kt);
 
   TLorentzVector pSum = p1.q + p2.q;
   TVector3 b = pSum.BoostVector();
@@ -326,6 +333,10 @@ double femptoSource::doInteract(particleMC& p1, particleMC& p2, float chargeColo
 
   double momFinal = getKstarFinal(coalProb) * 1E-3;
   float scaling = momFinal / p1.q.P();
+//  if(scaling < 0.8){
+//    printf("kt=%f - k*=%f -> scaling=%f - K = %f\n",kt,p1.q.P(),scaling,p1.q.P()*p1.q.P()/938.);
+//    scaling = 0.8;
+//  }
 
   double m1 = p1.q.M();
   double px1= p1.q.Px()*scaling;

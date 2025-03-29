@@ -15,7 +15,7 @@ class femptoSource : public vfempto
     virtual void init();
 
     void setSourceRadius(float radius);
-    void setKstar(float kstar);
+    void setKstar(float kstar, float kt=1.0);
     void setCharges(float cS, float cC);
 
     TF1 *getCoalRe() { return mCoalescenceRe; }
@@ -34,7 +34,7 @@ class femptoSource : public vfempto
     TF1 *getSourceV () { return mSourceV; }
     float kineticSource() const { double err; return mSourceKin->IntegralOneDim(0,mMaxIntRange,1E-8,1E-8,err); }
     float potentialSource() const { double err; return mSourceV->IntegralOneDim(0,mMaxIntRange,1E-8,1E-8,err); }
-    float getKstarFinal(float coalProb = 0.) const;
+    float getKstarFinal(float coalProb = 0., float massRed=MRED, float boundE=EBOUND) const;
     float kineticDeuteron() const { double err; return mDeuteronKin->IntegralOneDim(0,mMaxIntRange,1E-8,1E-8,err); }
     float potentialDeuteron() const { double err; return mDeuteronV->IntegralOneDim(0,mMaxIntRange,1E-8,1E-8,err); }
 

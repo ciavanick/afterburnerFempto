@@ -35,9 +35,9 @@ void test(bool interact=true){
 
   float sourceSize = 0;
 
-  vfempto *interactor= new vfempto;   // simple model box potential
-//  vfempto *interactor= new fempto;      // Lenard-Jones  strong potential
-
+//  vfempto *interactor= new vfempto;   // simple model box potential
+  vfempto *interactor= new femptoSource;      // Lenard-Jones  strong potential
+  interactor->setParams(33.7, 2.1, 1.44, -2);
 //  interactor->setParams(2.2E-3, 2.4, 1.44E-3, sourceSize);
 
   TH1D *h = new TH1D("h",";k* (GeV/c)",nbins,0,0.2);
@@ -56,6 +56,9 @@ void test(bool interact=true){
   TH1D *hB3 = new TH1D("hB3",";p/A (GeV/c);N(p/A)_{D} / N(p/A)_{p} / N(p/A)_{n} (GeV/c)",100,0,5);
 
   TH1D *hMass = new TH1D("hMass",";mass (GeV/c^{2})",1000,0,10);
+
+  TH2F *hDEtaDPhi = new TH2F("hDEtaDPhi",";eta;phi",40,-2,2,20,-TMath::Pi()/2,TMath::Pi()*3./2);
+  TH2F *hDEtaDPhiME = new TH2F("hDEtaDPhiME",";eta;phi",40,-2,2,20,-TMath::Pi()/2,TMath::Pi()*3./2);
 
   h->SetLineColor(2);
   h2->SetLineColor(1);
@@ -77,7 +80,8 @@ void test(bool interact=true){
     }
 
     if(interact){
-      interactor->doInteractAll(evPrev[i]);
+      interactor->doInteractAll(evPrev[i],0,1);
+      interactor->doInteractAll(evPrev[i],1,0);
     }
 
   }
@@ -96,6 +100,10 @@ void test(bool interact=true){
       const particleMC& p1 = event[i1];
 
       hMass->Fill(p1.q.M());
+
+      if(std::abs(p1.q.Eta()) > 1){
+        continue;
+      }
 
       if(p1.pdg == 6536){
         hHe->Fill(p1.q.P()/3);
@@ -124,6 +132,10 @@ void test(bool interact=true){
       for(int i2=(i1+1)*samePart; i2 < event.size(); i2++){
         const particleMC& p2 = event[i2];
 
+        if(std::abs(p2.q.Eta()) > 1){
+          continue;
+        }
+
         if(!sel2(p2)){
           continue;
         }
@@ -131,6 +143,14 @@ void test(bool interact=true){
         if(chargeComb*p1.ColoumbC*p2.ColoumbC < 0){
           continue;
         }
+
+        double dEta = p1.q.Eta() - p2.q.Eta();
+        double dPhi = p1.q.Phi() - p2.q.Phi();
+
+        while(dPhi < -TMath::Pi()*0.5) dPhi += 2*TMath::Pi();
+        while(dPhi > TMath::Pi()*1.5) dPhi -= 2*TMath::Pi();
+
+        hDEtaDPhi->Fill(dEta,dPhi);
 
         double kt = utils::getKt(p1,p2);
         if(fabs(kt-1) < 0.2) {
@@ -156,12 +176,20 @@ void test(bool interact=true){
       for(int i1=0; i1 < event.size(); i1++){
         const particleMC& p1 = event[i1];
 
+        if(std::abs(p1.q.Eta()) > 1){
+          continue;
+        }
+
         if(!sel1(p1)){
           continue;
         }
 
         for(int i2=0; i2 < evPrev[j] .size(); i2++){
           const particleMC& p2 = evPrev[j][i2];
+
+          if(std::abs(p2.q.Eta()) > 1){
+            continue;
+          }
 
           if(!sel2(p2)){
             continue;
@@ -170,6 +198,14 @@ void test(bool interact=true){
           if(chargeComb*p1.ColoumbC*p2.ColoumbC < 0){
             continue;
           }
+
+          double dEta = p1.q.Eta() - p2.q.Eta();
+          double dPhi = p1.q.Phi() - p2.q.Phi();
+
+          while(dPhi < -TMath::Pi()*0.5) dPhi += 2*TMath::Pi();
+          while(dPhi > TMath::Pi()*1.5) dPhi -= 2*TMath::Pi();
+
+          hDEtaDPhiME->Fill(dEta,dPhi);
 
           double kt = utils::getKt(p1,p2);
           if(fabs(kt-1) < 0.2) {
@@ -241,7 +277,8 @@ void test(bool interact=true){
   new TCanvas;
   interactor->getHistoGroup()->Draw();
   interactor->getHistoMerge()->Draw("SAME");
-
+  new TCanvas;
+  hDEtaDPhi->Draw("surf2");
   TFile *fout = new TFile("resNew.root","RECREATE");
   h->Write();
   h2->Write();
@@ -254,6 +291,8 @@ void test(bool interact=true){
   hDe->Write();
   hHe->Write();
   hMass->Write();
+  hDEtaDPhi->Write();
+  hDEtaDPhiME->Write();
   interactor->getHistoGroup()->Write();
   interactor->getHistoMerge()->Write();
   fout->Close();
@@ -323,11 +362,17 @@ bool sel1(const particleMC& p){
   if(p.daughters.size()){
     return false;
   }
+  if(p.q.Pt() < 0.4 || p.q.Pt() > 1){
+    return false;
+  }
   return (std::abs(p.pdg) == pdg1);
 }
 
 bool sel2(const particleMC& p){
   if(p.daughters.size()){
+    return false;
+  }
+  if(p.q.Pt() < 0.4 || p.q.Pt() > 1){
     return false;
   }
   return (std::abs(p.pdg) == pdg2);
