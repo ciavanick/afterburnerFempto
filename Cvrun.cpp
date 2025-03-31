@@ -4,6 +4,9 @@
 void vrun::setEvent(const std::vector<particleMC>& vect){
   mVect.clear();
   for(const auto& o : vect){
+    if(o.daughters.size() > 0){
+      continue;
+    }
     particleCand p;
     p.addOption(o.q.Px(), o.q.Py(), o.q.Pz(), o.pdg); // in this case only one option is set since MC truth is known
 
@@ -115,8 +118,8 @@ void vrun::process(){
            double kt = utils::getKt(p1,p2,ipdg1,ipdg2);
            double kstar = utils::getKstar(p1,p2,ipdg1,ipdg2);
 
-           bool conditionEta1 = (p1.q[ipdg1].Eta() > -1. && p1.q[ipdg1].Eta() < 1.);
-           bool conditionEta2 = (p2.q[ipdg2].Eta() > -1. && p2.q[ipdg2].Eta() < 1.);
+           bool conditionEta1 = (std::abs(p1.q[ipdg1].Eta()) < 1.);
+           bool conditionEta2 = (std::abs(p2.q[ipdg2].Eta()) < 1.);
            bool conditionPt1 = (p1.q[ipdg1].Pt() > 0.4 && p1.q[ipdg1].Pt() < 1.);
            bool conditionPt2 = (p2.q[ipdg2].Pt() > 0.4 && p2.q[ipdg2].Pt() < 1.);
 
@@ -144,7 +147,7 @@ void vrun::process(){
 //_________________________________________________________________________
 int vrun::selectP1(const particleCand& p){
   for(int i=0; i < p.pdgOptions.size(); i++){
-    if(p.pdgOptions[i] == mPDG1){
+    if(p.pdgOptions[i] == mPDG1 && std::abs(p.q[i].Eta()) < 1){
       return i;
     }
   }
@@ -153,7 +156,7 @@ int vrun::selectP1(const particleCand& p){
 //_________________________________________________________________________
 int vrun::selectP2(const particleCand& p){
   for(int i=0; i < p.pdgOptions.size(); i++){
-    if(p.pdgOptions[i] == mPDG2){
+    if(p.pdgOptions[i] == mPDG2 && std::abs(p.q[i].Eta()) < 1){
       return i;
     }
   }

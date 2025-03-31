@@ -313,8 +313,27 @@ float femptoSource::getCoalProb(const particleMC& p1, const particleMC& p2) {
 }
 //_________________________________________________________________________
 double femptoSource::doInteract(particleMC& p1, particleMC& p2, float chargeColoumb, float chargeStrong, float sumRadii, float *pos, float *posLab){
-  double kstar = utils::getKstar(p1,p2) * 1E3; // to MeV
+  if(utils::getKstar(p1,p2) > mThreshold){
+    return 0;
+  }
+
+  setCharges(chargeStrong,chargeColoumb);
   double kt = utils::getKt(p1,p2);
+
+  // compute scaling at threshold
+  setKstar(mThreshold * 1E3, kt);
+  float coalProbAtTh = 0;
+  if(std::abs(chargeStrong) > 0.9 && std::abs(chargeColoumb) < 1E-3) { // coalescence allowed
+    coalProbAtTh = calcProb();
+  }
+  double momFinalAtTh = getKstarFinal(coalProbAtTh) * 1E-3;
+  float scalingAtTh = momFinalAtTh / mThreshold;
+
+  if(scalingAtTh > 1){
+    scalingAtTh = 1;
+  }
+
+  double kstar = utils::getKstar(p1,p2) * 1E3; // to MeV
   setKstar(kstar,kt);
 
   TLorentzVector pSum = p1.q + p2.q;
@@ -324,15 +343,14 @@ double femptoSource::doInteract(particleMC& p1, particleMC& p2, float chargeColo
   p1.q.Boost(bInv);
   p2.q.Boost(bInv);
 
-  setCharges(chargeStrong,chargeColoumb);
-
   float coalProb = 0;
   if(std::abs(chargeStrong) > 0.9 && std::abs(chargeColoumb) < 1E-3) { // coalescence allowed
     coalProb = calcProb();
   }
 
-  double momFinal = getKstarFinal(coalProb) * 1E-3;
+  double momFinal = getKstarFinal(coalProb) * 1E-3 / scalingAtTh;
   float scaling = momFinal / p1.q.P();
+
 //  if(scaling < 0.8){
 //    printf("kt=%f - k*=%f -> scaling=%f - K = %f\n",kt,p1.q.P(),scaling,p1.q.P()*p1.q.P()/938.);
 //    scaling = 0.8;
