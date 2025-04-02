@@ -14,7 +14,7 @@ class vfempto
     virtual void init() { mIsInitialized = true; };
     virtual void setThreshold(double threshold){mThreshold = threshold;}
 
-    static void setParams(float strong=2.2E-3, float strongR=2.4, float coloumb=1.44E-3, float sourceRadius=0, float spinFact=3./8) { mStrong = strong, mStrongR = strongR, mCoulomb = coloumb, mSourceRadius = sourceRadius, mSpinCoalFactor = spinFact; }
+    virtual void setParams(float strong=2.2E-3, float strongR=2.4, float coloumb=1.44E-3, float sourceRadius=0, float spinFact=3./8) { mStrong = strong, mStrongR = strongR, mCoulomb = coloumb, mSourceRadius = sourceRadius, mSpinCoalFactor = spinFact; }
     float getStrong() const { return mStrong; }
     float getStrongRadius() const { return mStrongR; }
     float getColoumb() const { return mCoulomb; }
@@ -23,11 +23,11 @@ class vfempto
     TH1F* getHistoMerge() { return mHsizeMerge; }
     
   protected:
-    static float mStrong;     // attractive potential
-    static float mStrongR;    // radius of box potential
-    static float mCoulomb;
-    static float mSourceRadius;
-    static float mSpinCoalFactor;
+    float mStrong = 2.2E-3;      // attractive potential
+    float mStrongR = 2.4;        // radius of box potential
+    float mCoulomb = 1.44E-3;
+    float mSourceRadius = 0;
+    float mSpinCoalFactor = 3./8;
     bool mIsInitialized = false;
     double mThreshold = 0.4;
 

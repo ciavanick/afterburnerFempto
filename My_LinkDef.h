@@ -10,6 +10,7 @@
 #pragma link C++ class std::vector<particle>;
 #pragma link C++ class std::vector<particleMC>;
 #pragma link C++ class utils++;
+#pragma link C++ class waveUtils++;
 #pragma link C++ class vfempto++;
 #pragma link C++ class fempto++;
 #pragma link C++ class femptoSource++;

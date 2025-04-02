@@ -1,12 +1,6 @@
 #include "Cvfempto.h"
 #include "TRandom.h"
 
-float vfempto::mStrong = 2.2E-3;     // attractive potential
-float vfempto::mStrongR = 2.4;        // radius of box potential
-float vfempto::mCoulomb = 1.44E-3;
-float vfempto::mSourceRadius = 0;
-float vfempto::mSpinCoalFactor = 3./8;
-
 void vfempto::doInteractAll(std::vector<particleMC>& part, bool doScattering, bool doCoal){
   if(! mIsInitialized){
     init();
