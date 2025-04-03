@@ -81,10 +81,7 @@ void vrun::process(){
       bool conditionPt2 = (p2.q[ipdg2].Pt() > 0.4 && p2.q[ipdg2].Pt() < 1.);
 
       if(conditionEta1 && conditionEta2 && conditionPt1 && conditionPt2){
-        double rangeMin = -TMath::Pi()*0.5;
-        double rangeMax = TMath::Pi()*3*0.5;
-        double shift = TMath::Pi()*2;
-        double dPhi = utils::getDPhi(p1,p2,ipdg1,ipdg2,rangeMin,rangeMax,shift);
+        double dPhi = utils::getDPhi(p1,p2,ipdg1,ipdg2);
         double dEta = utils::getDEta(p1,p2,ipdg1,ipdg2);
 
         mDPhiDEtaSE->Fill(dEta, dPhi);
@@ -124,10 +121,7 @@ void vrun::process(){
            bool conditionPt2 = (p2.q[ipdg2].Pt() > 0.4 && p2.q[ipdg2].Pt() < 1.);
 
            if(conditionEta1 && conditionEta2 && conditionPt1 && conditionPt2){
-            double rangeMin = -TMath::Pi()*0.5;
-            double rangeMax = TMath::Pi()*3*0.5;
-            double shift = TMath::Pi()*2;
-            double dPhi = utils::getDPhi(p1,p2,ipdg1,ipdg2,rangeMin,rangeMax,shift);
+            double dPhi = utils::getDPhi(p1,p2,ipdg1,ipdg2);
             double dEta = utils::getDEta(p1,p2,ipdg1,ipdg2);
 
             mDPhiDEtaME->Fill(dEta, dPhi);
