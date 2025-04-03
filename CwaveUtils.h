@@ -23,11 +23,13 @@ class waveUtils
     static void init();
     static float getCoalProb(const particleMC& p1, const particleMC& p2);
     static float calcProb();
-    static void setParams(float strong=2.22, float strongR=3.2, float coloumb=1.44, float sourceRadius=0, float spinFact=3./8) { mStrong = strong, mStrongR = strongR, mCoulomb = coloumb, mSourceRadius = sourceRadius, mSpinCoalFactor = spinFact; }
+    static void setParams(float strong=17.4, float strongR=3.2, float coloumb=1.44, float sourceRadius=0, float spinFact=3./8) { mStrong = strong, mStrongR = strongR, mCoulomb = coloumb, mSourceRadius = sourceRadius, mSpinCoalFactor = spinFact; }
 
     static void setSourceRadius(float radius);
     static void setKstar(float kstar, float kt=1.0, type system=pn);
     static void setCharges(float cS, float cC);
+
+    static void setNuclearRadius(float radius);
 
     static TF1 *getCoalRe() { return mCoalescenceRe; }
     static TF1 *getCoalIm() { return mCoalescenceIm; }
@@ -73,6 +75,10 @@ class waveUtils
     static float mStrongDD;
     static float mStrongTn;
     static float mStrongHen;
+    static float mStrongRDn;                      // radius of box potential
+    static float mStrongRDD;                      // radius of box potential
+    static float mStrongRTn;                      // radius of box potential
+    static float mStrongRHen;                     // radius of box potential
 
     // deuteron functions
     static double uDeuteron(double *x,double *pm);

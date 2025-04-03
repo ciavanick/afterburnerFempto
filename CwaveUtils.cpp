@@ -14,6 +14,10 @@ float waveUtils::mStrongDn = 0;
 float waveUtils::mStrongDD = 0;
 float waveUtils::mStrongTn = 0;
 float waveUtils::mStrongHen = 0;
+float waveUtils::mStrongRDn = 3.2;
+float waveUtils::mStrongRDD = 3.2;
+float waveUtils::mStrongRTn = 3.2;
+float waveUtils::mStrongRHen = 3.2;
 
 TF1 *waveUtils::mDeuteron = nullptr;
 TF1 *waveUtils::mUDeuteron = nullptr;
@@ -28,6 +32,54 @@ TF1 *waveUtils::mSourceV = nullptr;
 TF1 *waveUtils::mCoalescenceRe = nullptr;
 TF1 *waveUtils::mCoalescenceIm = nullptr;
 
+void waveUtils::setNuclearRadius(float radius){
+  mDeuteronV->SetParameter(7,radius);
+  mDeuteron2int->SetParameter(0,1);
+  mDeuteron2int->SetParameter(1,radius);
+  mDeuteron2int->SetParameter(2,mK1);
+  mDeuteron2int->SetParameter(3,mK2);
+  mDeuteron2int->SetParameter(4,mNormRight);
+  double err;
+  double norm = 1./sqrt(mDeuteron2int->IntegralOneDim(0,20,1E-8,1E-8,err));
+  mDeuteron2int->SetParameter(0,norm);
+
+  mDeuteron->SetParameter(0,norm);
+  mDeuteron->SetParameter(1,radius);
+  mDeuteron->SetParameter(2,mK1);
+  mDeuteron->SetParameter(3,mK2);
+  mDeuteron->SetParameter(4,mNormRight);
+
+  mUDeuteron->SetParameter(0,norm);
+  mUDeuteron->SetParameter(1,radius);
+  mUDeuteron->SetParameter(2,mK1);
+  mUDeuteron->SetParameter(3,mK2);
+  mUDeuteron->SetParameter(4,mNormRight);
+
+  mDeuteronKin->SetParameter(0,norm);
+  mDeuteronKin->SetParameter(1,radius);
+  mDeuteronKin->SetParameter(2,mK1);
+  mDeuteronKin->SetParameter(3,mK2);
+  mDeuteronKin->SetParameter(4,mNormRight);
+
+  mDeuteronV->SetParameter(0,norm);
+  mDeuteronV->SetParameter(1,radius);
+  mDeuteronV->SetParameter(2,mK1);
+  mDeuteronV->SetParameter(3,mK2);
+  mDeuteronV->SetParameter(4,mNormRight);
+
+  mCoalescenceRe->SetParameter(3, norm);
+  mCoalescenceRe->SetParameter(4, radius);
+  mCoalescenceRe->SetParameter(5, mK1);
+  mCoalescenceRe->SetParameter(6, mK2);
+  mCoalescenceRe->SetParameter(7, mNormRight);
+
+  mCoalescenceIm->SetParameter(3, norm);
+  mCoalescenceIm->SetParameter(4, radius);
+  mCoalescenceIm->SetParameter(5, mK1);
+  mCoalescenceIm->SetParameter(6, mK2);
+  mCoalescenceIm->SetParameter(7, mNormRight);
+}
+//_________________________________________________________________________
 float waveUtils::calculateRadius(float EbindingEff, float mred, float chargeStrong, float chargeCoulomb, const char* title){
   if(EbindingEff >= 0){
     printf("EbindingEff = %f >= 0 -> not a bound state!!!!\n",EbindingEff);
@@ -71,7 +123,7 @@ float waveUtils::calculateV0(float EbindingEff, float mred, float chargeStrong, 
   printf("Defining wave-function for %s bound state with Ebinding = %f\n",title,EbindingEff);
   printf("k1 = %f - k2 = %f --> V0/Cs = %f\n",k1,k2,V0strong/chargeStrong);
 
-  return rad;
+  return V0strong/chargeStrong;
 }
 //_________________________________________________________________________
 float waveUtils::getKstarFinal(float coalProb, float massRed, float boundE) {
@@ -94,20 +146,45 @@ void waveUtils::setKstar(float kstar, float kt, type system) {
   if(! mIsInitialized){
     init();
   }
+  float radiusStrong = mStrongR;
   if(system==nn || system==pn || system==pp){
     mK1 = sqrt(2*MRED_NN*(EBOUND_D+mStrong))/HCUT;
     mK2 = sqrt(-2*MRED_NN*EBOUND_D)/HCUT;
+    mDeuteronKin->SetParameter(5,MRED_NN);
+    mSourceKin->SetParameter(3,MRED_NN);
+    mSourceV->SetParameter(4,radiusStrong); // no need to normalize source
+    mSourceV->SetParameter(5,mStrong); // no need to normalize source
+    mDeuteronV->SetParameter(8,mStrong);
   } else if(system==Dn || system==Dp) {
+    radiusStrong = mStrongRDn;
     mK1 = sqrt(2*MRED_DN*((EBOUND_T - EBOUND_D)+mStrongDn*2))/HCUT;
     mK2 = sqrt(-2*MRED_DN*(EBOUND_T - EBOUND_D))/HCUT;
+    mDeuteronKin->SetParameter(5,MRED_DN);
+    mSourceKin->SetParameter(3,MRED_DN);
+    mSourceV->SetParameter(4,radiusStrong); // no need to normalize source
+    mSourceV->SetParameter(5,mStrongDn); // no need to normalize source
+    mDeuteronV->SetParameter(8,mStrongDn);
   } else if(system==DD) {
+    radiusStrong = mStrongRDD;
     mK1 = sqrt(2*MRED_DD*((EBOUND_HE - 2*EBOUND_D)+mStrongDn*4))/HCUT;
     mK2 = sqrt(-2*MRED_DD*(EBOUND_HE - 2*EBOUND_D))/HCUT;
+    mDeuteronKin->SetParameter(5,MRED_DD);
+    mSourceKin->SetParameter(3,MRED_DD);
+    mSourceV->SetParameter(4,radiusStrong); // no need to normalize source
+    mSourceV->SetParameter(5,mStrongDD); // no need to normalize source
+    mDeuteronV->SetParameter(8,mStrongDD);
   } else if(system==Tn || system==Tp || system==Hen || system==Hep) {
+    radiusStrong = mStrongRTn;
     mK1 = sqrt(2*MRED_TN*((EBOUND_HE - EBOUND_T)+mStrongDn*3))/HCUT;
     mK2 = sqrt(-2*MRED_TN*(EBOUND_HE - EBOUND_T))/HCUT;
+    mDeuteronKin->SetParameter(5,MRED_TN);
+    mSourceKin->SetParameter(3,MRED_TN);
+    mSourceV->SetParameter(4,radiusStrong); // no need to normalize source
+    mSourceV->SetParameter(5,mStrongTn); // no need to normalize source
+    mDeuteronV->SetParameter(8,mStrongTn);
   }
   mNormRight = sin(mK1*mStrongR) * TMath::Exp(mK2*mStrongR);
+//  setNuclearRadius(radiusStrong);
 
   if(mSourceRadius < 0){
     float radiusSource = std::abs(mSourceRadius/kt);
@@ -218,11 +295,12 @@ double waveUtils::deuteronKin(double *x,double *pm){
     double radius = pm[1];
     double k1 = pm[2];
     double k2 = pm[3];
+    double mred = pm[5];
 
     if(r < radius){
-      res = k1*k1*HCUT*HCUT*0.5/MRED_NN;
+      res = k1*k1*HCUT*HCUT*0.5/mred;
     } else {
-      res = -k2*k2*HCUT*HCUT*0.5/MRED_NN;
+      res = -k2*k2*HCUT*HCUT*0.5/mred;
     }
 
   return res * intDeuteron(x,pm);
@@ -232,9 +310,12 @@ double waveUtils::deuteronV(double *x,double *pm){
   double r = x[0];
   float chargeStrong = pm[5];
   float chargeColoumb = pm[6];
+  float strongR = pm[7];
+  float strong = pm[8];
+
   double val = 0;
-  if(r < mStrongR){
-    val = - mStrong * chargeStrong;
+  if(r < strongR){
+    val = - strong * chargeStrong;
   }
   val += chargeColoumb * mCoulomb / r;
 
@@ -285,10 +366,11 @@ double waveUtils::sourceKin(double *x,double *pm){
   double radius = pm[1];
   double kstar = pm[2];
   double R02inv = 1./(radius*radius);
+  double mred = pm[3];
 
-  double val = 3 * R02inv * (HCUT*HCUT)/(2*MRED_NN);
-  val -= r*r*R02inv*R02inv * (HCUT*HCUT)/(2*MRED_NN);
-  val += kstar*kstar / (2*MRED_NN);
+  double val = 3 * R02inv * (HCUT*HCUT)/(2*mred);
+  val -= r*r*R02inv*R02inv * (HCUT*HCUT)/(2*mred);
+  val += kstar*kstar / (2*mred);
 
   return val * source2int(x,pm);
 }
@@ -297,13 +379,20 @@ double waveUtils::sourceV(double *x,double *pm){
   double r = x[0];
   float chargeStrong = pm[2];
   float chargeColoumb = pm[3];
-  double val = - (r < mStrongR) * mStrong * chargeStrong;
+  float strongR = pm[4];
+  float strong = pm[5];
+
+  double val = - (r < strongR) * strong * chargeStrong;
   val += chargeColoumb * mCoulomb / r;
 
   return val * source2int(x,pm);
 }
 //_________________________________________________________________________
 void waveUtils::init(){
+  printf("before %f\n",mStrong);
+  mStrong = calculateV0(EBOUND_D, 938/2, 1, 0, "deuteron(p+n)");
+  printf("after %f\n",mStrong);
+
   mIsInitialized = true;
   mK1 = sqrt(2*MRED_NN*(EBOUND_D+mStrong))/HCUT;
   mK2 = sqrt(-2*MRED_NN*EBOUND_D)/HCUT;
@@ -313,8 +402,10 @@ void waveUtils::init(){
   mSource = new TF1("fSource",waveUtils::source,0,20,2);
   mUSource = new TF1("fUSource",waveUtils::usource,0,20,2);
   mSource2int = new TF1("fSource2int",waveUtils::source2int,0,20,2);
-  mSourceKin = new TF1("fSourceKin",waveUtils::sourceKin,0,20,3);
-  mSourceV = new TF1("fSourceV",waveUtils::sourceV,0,20,4);
+  mSourceKin = new TF1("fSourceKin",waveUtils::sourceKin,0,20,4);
+  mSourceV = new TF1("fSourceV",waveUtils::sourceV,0,20,6);
+  mSourceV->SetParameter(4,mStrongR);
+  mSourceV->SetParameter(5,mStrong);
 
   mDeuteron2int = new TF1("fDeuteron2int",waveUtils::intDeuteron,0,20,5);
   mDeuteron2int->SetParameter(0,1);
@@ -340,19 +431,22 @@ void waveUtils::init(){
   mUDeuteron->SetParameter(3,mK2);
   mUDeuteron->SetParameter(4,mNormRight);
 
-  mDeuteronKin = new TF1("fDeuteronKin",waveUtils::deuteronKin,0,20,5);
+  mDeuteronKin = new TF1("fDeuteronKin",waveUtils::deuteronKin,0,20,6);
   mDeuteronKin->SetParameter(0,norm);
   mDeuteronKin->SetParameter(1,mStrongR);
   mDeuteronKin->SetParameter(2,mK1);
   mDeuteronKin->SetParameter(3,mK2);
   mDeuteronKin->SetParameter(4,mNormRight);
+  mDeuteronKin->SetParameter(5,MRED_NN);
 
-  mDeuteronV = new TF1("fDeuteronV",waveUtils::deuteronV,0,20,7);
+  mDeuteronV = new TF1("fDeuteronV",waveUtils::deuteronV,0,20,9);
   mDeuteronV->SetParameter(0,norm);
   mDeuteronV->SetParameter(1,mStrongR);
   mDeuteronV->SetParameter(2,mK1);
   mDeuteronV->SetParameter(3,mK2);
   mDeuteronV->SetParameter(4,mNormRight);
+  mDeuteronV->SetParameter(7,mStrongR);
+  mDeuteronV->SetParameter(8,mStrong);
 
   mCoalescenceRe = new TF1("fCoalescenceRe",waveUtils::coalescenceRe,0,20,8);
   mCoalescenceRe->SetParameter(3, norm);
@@ -373,11 +467,15 @@ void waveUtils::init(){
     setSourceRadius(0);
   }
 
-//  calculateV0(-2.22, 938/2, 1, 0, "deuteron(p+n)");
-  mStrongDn = calculateV0(EBOUND_T - EBOUND_T, MRED_DN, 2, 0, "triton(2H+n)");
-  mStrongTn = calculateV0(EBOUND_HE - EBOUND_T, MRED_TN, 3, 1, "4He(3H+p)");
-  mStrongHen = calculateV0(EBOUND_HE - EBOUND_3HE, MRED_HEN, 3, 0, "4He(3He+n)");
-  mStrongDD = calculateV0(EBOUND_HE - 2*EBOUND_D, MRED_DD, 4, 1, "4He(2H+2H)");
+  mStrongDn = mStrong; //calculateV0(EBOUND_T - EBOUND_D, MRED_DN, 2, 0, "triton(2H+n)");
+  mStrongTn = mStrong; //calculateV0(EBOUND_HE - EBOUND_D, MRED_TN, 3, 1, "4He(3H+p)");
+  mStrongHen = mStrong; //calculateV0(EBOUND_HE - EBOUND_3HE, MRED_HEN, 3, 0, "4He(3He+n)");
+  mStrongDD = mStrong; //calculateV0(EBOUND_HE - 2*EBOUND_D, MRED_DD, 4, 1, "4He(2H+2H)");
+
+  mStrongRDn = calculateRadius(EBOUND_T - EBOUND_D, MRED_DN, 2, 0, "triton(2H+n)");
+  mStrongRTn = calculateRadius(EBOUND_HE - EBOUND_D, MRED_TN, 3, 1, "4He(3H+p)");
+  mStrongRHen = calculateRadius(EBOUND_HE - EBOUND_3HE, MRED_HEN, 3, 0, "4He(3He+n)");
+  mStrongRDD = calculateRadius(EBOUND_HE - 2*EBOUND_D, MRED_DD, 4, 1, "4He(2H+2H)");
 
 }
 //_________________________________________________________________________

@@ -1,26 +1,63 @@
 void wavetest(float rsource=-3){
-  waveUtils::type system=waveUtils::pn;
-
-  float mred = 938/2.;
-  float kstar = 50;
-
-  bool coal = false;
-
-  float bindingE=-2.22;
+  waveUtils::type system=waveUtils::pp;
 
   float radius = 3.2;
   float V0 = 17.4;
   float spinFact = 3./8;
+  float bindingE=-2.22;
 
   waveUtils a;
   a.setParams(V0, radius, 1.44, rsource,spinFact);
-
   a.init();
-  if(coal){
-    a.setCharges(1,0); // for p-n
-  } else {
-    a.setCharges(1,1);
+
+  float mred = 938/2.;
+
+  bool coal = true;
+
+  if(system==waveUtils::pn || system==waveUtils::pp || system==waveUtils::nn) {
+    if(system==waveUtils::pn || system==waveUtils::nn){
+      a.setCharges(1,0);
+      if(system==waveUtils::nn){
+        coal = false;
+      }
+    } else {
+      a.setCharges(1,1);
+      coal = false;
+    }
   }
+
+  if(system==waveUtils::Dn || system==waveUtils::Dp){
+    mred = 2*938/3.;
+    bindingE = -8.48 + 2.22;
+    if(system==waveUtils::Dn){
+      a.setCharges(2,0);
+    } else {
+      a.setCharges(2,1);
+    }
+  }
+  if(system==waveUtils::Tn || system==waveUtils::Tp || system==waveUtils::Hen || system==waveUtils::Hep){
+    mred = 3*938/4.;
+    bindingE = -28.3 + 8.48;
+    if(system==waveUtils::Tn || system==waveUtils::Hen){
+      a.setCharges(3,0);
+      if(system==waveUtils::Tn){
+        coal = false;
+      }
+    } else if(system==waveUtils::Tp) {
+      a.setCharges(3,1);
+    } else {
+      a.setCharges(3,2);
+      coal = false;
+    }
+  }
+  if(system==waveUtils::DD){
+    mred = 938;
+    bindingE = -28.3 + 2.22*2;
+    a.setCharges(4,2);
+  }
+
+  float kstar = 50;
+
   a.setKstar(kstar,1,system);
   a.getUSource()->Draw();
   a.getUDeuteron()->Draw("SAME");
