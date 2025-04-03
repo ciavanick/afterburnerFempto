@@ -100,13 +100,13 @@ double utils::getKtAsPr(const particleMC& p1, const particleMC& p2){
   return pSum.Pt();
 }
 //_________________________________________________________________________
-double utils::getDPhi(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2, double rangeMin, double rangeMax, double shift){
+double utils::getDPhi(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2, double rangeMin, double rangeMax){
   double phi1 = p1.q[iPdg1].Phi();
   double phi2 = p2.q[iPdg2].Phi();
 
   double dPhi = phi1 - phi2;
-  if(dPhi < rangeMin) dPhi = dPhi + shift;
-  if(dPhi > rangeMax) dPhi = dPhi - shift;
+  if(dPhi < rangeMin) dPhi = dPhi + 2*TMath::Pi();
+  if(dPhi > rangeMax) dPhi = dPhi - 2*TMath::Pi();
 
   return dPhi;
 }
@@ -117,6 +117,14 @@ double utils::getDEta(const particleCand& p1, const particleCand& p2, int iPdg1,
   double dEta = eta1 - eta2;
   return dEta;
 }
+//_________________________________________________________________________
+void utils::setDPhiRange(double rangeMin, double rangeMax){
+  mRangeMin = rangeMin;
+  mRangeMax = rangeMax;
+}
+//_________________________________________________________________________
+double utils::mRangeMin = -TMath::Pi()*0.5;
+double utils::mRangeMax = TMath::Pi()*3*0.5;
 //_________________________________________________________________________
 void particleMC::print() const {
   printf("pdg = %d - mother = %d - charges: Strong = %d, Coloumb = %d - Ndaugthers = %lu\n",pdg, mother, StrongC, ColoumbC, daughters.size());
