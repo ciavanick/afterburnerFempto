@@ -7,13 +7,26 @@
 class waveUtils
 {
   public:
+    enum type{
+      nn=0,
+      pn=1,
+      pp=2,
+      Dn=3,
+      Dp=4,
+      DD=5,
+      Tn=6,
+      Tp=7,
+      Hen=8,
+      Hep=9
+    };
+
     static void init();
     static float getCoalProb(const particleMC& p1, const particleMC& p2);
     static float calcProb();
-    static void setParams(float strong=2.2E-3, float strongR=2.4, float coloumb=1.44E-3, float sourceRadius=0, float spinFact=3./8) { mStrong = strong, mStrongR = strongR, mCoulomb = coloumb, mSourceRadius = sourceRadius, mSpinCoalFactor = spinFact; }
+    static void setParams(float strong=2.22, float strongR=3.2, float coloumb=1.44, float sourceRadius=0, float spinFact=3./8) { mStrong = strong, mStrongR = strongR, mCoulomb = coloumb, mSourceRadius = sourceRadius, mSpinCoalFactor = spinFact; }
 
     static void setSourceRadius(float radius);
-    static void setKstar(float kstar, float kt=1.0);
+    static void setKstar(float kstar, float kt=1.0, type system=pn);
     static void setCharges(float cS, float cC);
 
     static TF1 *getCoalRe() { return mCoalescenceRe; }
@@ -38,14 +51,28 @@ class waveUtils
 
     static bool mIsInitialized;
 
-    static constexpr double HCUT = 197.3; // [fm*Mev]
-    static constexpr double EBOUND_D = -2.22; // [MeV] deuteron binding energy
-    static constexpr float MRED_NN = 938/2.; // [MeV] reducted mass for Nucleon-Nucleon
-    static float mStrong;     // attractive potential
-    static float mStrongR;    // radius of box potential
+    static float calculateRadius(float EbindingEff=-2.22, float mred=938/2., float chargeStrong=1, float chargeCoulomb=0, const char* title="");
+    static float calculateV0(float EbindingEff=-2.22, float mred=938/2., float chargeStrong=1, float chargeCoulomb=0, const char* title="");
+
+    static constexpr double HCUT = 197.3;       // [fm*Mev]
+    static constexpr double EBOUND_D = -2.22;   // [MeV] deuteron binding energy
+    static constexpr double EBOUND_T = -8.48;   // [MeV] deuteron binding energy
+    static constexpr double EBOUND_3HE = -7.72; // [MeV] deuteron binding energy
+    static constexpr double EBOUND_HE = -28.3;  // [MeV] deuteron binding energy
+    static constexpr float MRED_NN = 938/2.;    // [MeV] reducted mass for Nucleon-Nucleon
+    static constexpr float MRED_DN = 2*938/3.;  // [MeV] reducted mass for Nucleon-Nucleon
+    static constexpr float MRED_DD = 938;       // [MeV] reducted mass for Nucleon-Nucleon
+    static constexpr float MRED_TN = 3*938/4.;  // [MeV] reducted mass for Nucleon-Nucleon
+    static constexpr float MRED_HEN = 3*938/4.; // [MeV] reducted mass for Nucleon-Nucleon
+    static float mStrong;                       // attractive potential
+    static float mStrongR;                      // radius of box potential
     static float mCoulomb;
     static float mSourceRadius;
     static float mSpinCoalFactor;
+    static float mStrongDn;
+    static float mStrongDD;
+    static float mStrongTn;
+    static float mStrongHen;
 
     // deuteron functions
     static double uDeuteron(double *x,double *pm);

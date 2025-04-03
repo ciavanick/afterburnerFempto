@@ -10,6 +10,10 @@ float waveUtils::mMaxIntRange = 20;
 double waveUtils::mK1 = 0;              // sqrt(2*MRED*(EBOUND+V0))/HCUT;
 double waveUtils::mK2 = 0;              // sqrt(-2*MRED*EBOUND)/HCUT;
 double waveUtils::mNormRight = 0;       // sin(k1*mStrongR) * TMath::Exp(k2*mStrongR);
+float waveUtils::mStrongDn = 0;
+float waveUtils::mStrongDD = 0;
+float waveUtils::mStrongTn = 0;
+float waveUtils::mStrongHen = 0;
 
 TF1 *waveUtils::mDeuteron = nullptr;
 TF1 *waveUtils::mUDeuteron = nullptr;
@@ -24,6 +28,52 @@ TF1 *waveUtils::mSourceV = nullptr;
 TF1 *waveUtils::mCoalescenceRe = nullptr;
 TF1 *waveUtils::mCoalescenceIm = nullptr;
 
+float waveUtils::calculateRadius(float EbindingEff, float mred, float chargeStrong, float chargeCoulomb, const char* title){
+  if(EbindingEff >= 0){
+    printf("EbindingEff = %f >= 0 -> not a bound state!!!!\n",EbindingEff);
+  }
+
+  float V0 = mStrong * chargeStrong - mCoulomb * 3 * chargeCoulomb; // factor 3 to translate the Coloumb potential when moving from 1/x (R = 2 fm) -> box function for the bounded wave-function (wip)
+
+  float k1 = sqrt(2*mred*(EbindingEff+V0))/HCUT;
+  float k2 = sqrt(-2*mred*EbindingEff)/HCUT;
+
+  printf("Defining wave-function for %s bound state with Ebinding = %f\n",title,EbindingEff);
+  float rad = (TMath::Pi()-TMath::ATan(k1/k2))/k1;
+  printf("k1 = %f - k2 = %f --> R = %f\n",k1,k2,rad);
+
+  return rad;
+}
+//_________________________________________________________________________
+float waveUtils::calculateV0(float EbindingEff, float mred, float chargeStrong, float chargeCoulomb, const char* title){
+  if(EbindingEff >= 0){
+    printf("EbindingEff = %f >= 0 -> not a bound state!!!!\n",EbindingEff);
+  }
+
+  float V0strong = mStrong * chargeStrong;
+  float V0 = V0strong - mCoulomb * 3 * chargeCoulomb; // factor 3 to translate the Coloumb potential when moving from 1/x (R = 2 fm) -> box function for the bounded wave>
+  float rad = mStrongR;
+  float k1 = sqrt(2*mred*(EbindingEff+V0))/HCUT;
+  float k2 = sqrt(-2*mred*EbindingEff)/HCUT;
+  float radcur = (TMath::Pi()-TMath::ATan(k1/k2))/k1;
+  while(std::abs(rad - radcur) > 0.001){
+    if(rad < radcur){
+      V0strong += 0.001;
+    } else {
+      V0strong -= 0.001;
+    }
+    V0 = V0strong - mCoulomb * 3 * chargeCoulomb;
+    k1 = sqrt(2*mred*(EbindingEff+V0))/HCUT;
+    k2 = sqrt(-2*mred*EbindingEff)/HCUT;
+    radcur = (TMath::Pi()-TMath::ATan(k1/k2))/k1;
+  }
+
+  printf("Defining wave-function for %s bound state with Ebinding = %f\n",title,EbindingEff);
+  printf("k1 = %f - k2 = %f --> V0/Cs = %f\n",k1,k2,V0strong/chargeStrong);
+
+  return rad;
+}
+//_________________________________________________________________________
 float waveUtils::getKstarFinal(float coalProb, float massRed, float boundE) {
   float Efin = TMath::Max(float(0.), (kineticSource() + potentialSource() - boundE*coalProb)/(1 - coalProb));
 
@@ -40,10 +90,25 @@ void waveUtils::setCharges(float cS, float cC){
   mDeuteronV->SetParameter(6,cC);
 }
 //_________________________________________________________________________
-void waveUtils::setKstar(float kstar, float kt) {
+void waveUtils::setKstar(float kstar, float kt, type system) {
   if(! mIsInitialized){
     init();
   }
+  if(system==nn || system==pn || system==pp){
+    mK1 = sqrt(2*MRED_NN*(EBOUND_D+mStrong))/HCUT;
+    mK2 = sqrt(-2*MRED_NN*EBOUND_D)/HCUT;
+  } else if(system==Dn || system==Dp) {
+    mK1 = sqrt(2*MRED_DN*((EBOUND_T - EBOUND_D)+mStrongDn*2))/HCUT;
+    mK2 = sqrt(-2*MRED_DN*(EBOUND_T - EBOUND_D))/HCUT;
+  } else if(system==DD) {
+    mK1 = sqrt(2*MRED_DD*((EBOUND_HE - 2*EBOUND_D)+mStrongDn*4))/HCUT;
+    mK2 = sqrt(-2*MRED_DD*(EBOUND_HE - 2*EBOUND_D))/HCUT;
+  } else if(system==Tn || system==Tp || system==Hen || system==Hep) {
+    mK1 = sqrt(2*MRED_TN*((EBOUND_HE - EBOUND_T)+mStrongDn*3))/HCUT;
+    mK2 = sqrt(-2*MRED_TN*(EBOUND_HE - EBOUND_T))/HCUT;
+  }
+  mNormRight = sin(mK1*mStrongR) * TMath::Exp(mK2*mStrongR);
+
   if(mSourceRadius < 0){
     float radiusSource = std::abs(mSourceRadius/kt);
     static const float factor = sqrt(3*0.5) * HCUT;
@@ -307,6 +372,13 @@ void waveUtils::init(){
   } else {
     setSourceRadius(0);
   }
+
+//  calculateV0(-2.22, 938/2, 1, 0, "deuteron(p+n)");
+  mStrongDn = calculateV0(EBOUND_T - EBOUND_T, MRED_DN, 2, 0, "triton(2H+n)");
+  mStrongTn = calculateV0(EBOUND_HE - EBOUND_T, MRED_TN, 3, 1, "4He(3H+p)");
+  mStrongHen = calculateV0(EBOUND_HE - EBOUND_3HE, MRED_HEN, 3, 0, "4He(3He+n)");
+  mStrongDD = calculateV0(EBOUND_HE - 2*EBOUND_D, MRED_DD, 4, 1, "4He(2H+2H)");
+
 }
 //_________________________________________________________________________
 float waveUtils::calcProb(){

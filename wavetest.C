@@ -1,4 +1,6 @@
 void wavetest(float rsource=-3){
+  waveUtils::type system=waveUtils::pn;
+
   float mred = 938/2.;
   float kstar = 50;
 
@@ -19,7 +21,7 @@ void wavetest(float rsource=-3){
   } else {
     a.setCharges(1,1);
   }
-  a.setKstar(kstar);
+  a.setKstar(kstar,1,system);
   a.getUSource()->Draw();
   a.getUDeuteron()->Draw("SAME");
 
@@ -41,7 +43,7 @@ void wavetest(float rsource=-3){
   float coalInt = 0;
   for(kstar = 1; kstar < 1000; kstar+=1){
     x[np] = kstar;
-    a.setKstar(kstar);
+    a.setKstar(kstar,1,system);
     s[np] = a.calcProb() * coal;
     coalInt += s[np]*kstar*kstar;
     y[np] = (a.kineticSource()/mred*(938/2.) + a.potentialSource() - bindingE*s[np])/(1-s[np]);
