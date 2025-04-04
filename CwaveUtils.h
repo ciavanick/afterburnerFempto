@@ -17,7 +17,8 @@ class waveUtils
       Tn=6,
       Tp=7,
       Hen=8,
-      Hep=9
+      Hep=9,
+      none=100
     };
 
     static void init();

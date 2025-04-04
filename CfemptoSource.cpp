@@ -6,16 +6,113 @@ void femptoSource::init(){
   vfempto::init();
 }
 //_________________________________________________________________________
-double femptoSource::doInteract(particleMC& p1, particleMC& p2, float chargeColoumb, float chargeStrong, float sumRadii, float *pos, float *posLab){
-  if(utils::getKstar(p1,p2) > mThreshold){
-    return 0;
+bool femptoSource::set(particleMC& p1, particleMC& p2, float chargeColoumb, float chargeStrong){
+ if(utils::getKstar(p1,p2) > mThreshold){
+    return false;
   }
+  int pdgM = std::abs(p1.pdg);
+  int pdgL = std::abs(p2.pdg);
 
+  if(pdgM < pdgL){
+    int dummy = pdgL;
+    pdgL = pdgM;
+    pdgM = dummy;
+  }
+  
+  waveUtils::type system=waveUtils::none;
+  if(pdgM == 2112){ // nn
+    system = waveUtils::nn;
+  } else if (pdgM == 2212) { // pn or pp
+    if(pdgL == 2112){
+      system = waveUtils::pn;
+    } else {
+      system = waveUtils::pp;
+    }
+  } else if(pdgM == 4324) { // Dn or Dp or DD
+    if(pdgL == 2112){
+      system = waveUtils::Dn;
+    } else if(pdgL == 2212){
+      system = waveUtils::Dp;
+    } else {
+      system = waveUtils::DD;
+    }
+  } else if(pdgM == 6436) { // Tn or Tp
+    if(pdgL == 2112){
+      system = waveUtils::Tn;
+    } else if(pdgL == 2212){
+      system = waveUtils::Tp;
+    }
+  } else if(pdgM == 6536) { // 3Hen o 3Hep
+    if(pdgL == 2112){
+      system = waveUtils::Hen;
+    } else if(pdgL == 2212){
+      system = waveUtils::Hep;
+    }
+  } 
+  
+  if(system == waveUtils::none){
+    return false;
+  }
+  
   setCharges(chargeStrong,chargeColoumb);
   double kt = utils::getKt(p1,p2);
+  double kstar = utils::getKstar(p1,p2) * 1E3; // to MeV
 
   // compute scaling at threshold
-  setKstar(mThreshold * 1E3, kt);
+  setKstar(kstar, kt, system);
+
+  return true;
+}
+//_________________________________________________________________________
+double femptoSource::doInteract(particleMC& p1, particleMC& p2, float chargeColoumb, float chargeStrong, float sumRadii, float *pos, float *posLab){
+  int pdgM = std::abs(p1.pdg);
+  int pdgL = std::abs(p2.pdg);
+
+  if(pdgM < pdgL){
+    int dummy = pdgL;
+    pdgL = pdgM;
+    pdgM = dummy;
+  }
+
+  waveUtils::type system=waveUtils::none;
+  if(pdgM == 2112){ // nn
+    system = waveUtils::nn;
+  } else if (pdgM == 2212) { // pn or pp
+    if(pdgL == 2112){
+      system = waveUtils::pn;
+    } else {
+      system = waveUtils::pp;
+    }
+  } else if(pdgM == 4324) { // Dn or Dp or DD
+    if(pdgL == 2112){
+      system = waveUtils::Dn;
+    } else if(pdgL == 2212){
+      system = waveUtils::Dp;
+    } else {
+      system = waveUtils::DD;
+    }
+  } else if(pdgM == 6436) { // Tn or Tp
+    if(pdgL == 2112){
+      system = waveUtils::Tn;
+    } else if(pdgL == 2212){
+      system = waveUtils::Tp;
+    }
+  } else if(pdgM == 6536) { // 3Hen o 3Hep
+    if(pdgL == 2112){
+      system = waveUtils::Hen;
+    } else if(pdgL == 2212){
+      system = waveUtils::Hep;
+    }
+  }
+
+  if(system == waveUtils::none){
+    return false;
+  }
+
+  // compute scaling at threshold
+  double kt = utils::getKt(p1,p2);
+  setKstar(mThreshold * 1E3, kt, system);
+
   float coalProbAtTh = 0;
   if(std::abs(chargeStrong) > 0.9 && std::abs(chargeColoumb) < 1E-3) { // coalescence allowed
     coalProbAtTh = calcProb();
@@ -28,7 +125,7 @@ double femptoSource::doInteract(particleMC& p1, particleMC& p2, float chargeColo
   }
 
   double kstar = utils::getKstar(p1,p2) * 1E3; // to MeV
-  setKstar(kstar,kt);
+  setKstar(kstar,kt,system);
 
   TLorentzVector pSum = p1.q + p2.q;
   TVector3 b = pSum.BoostVector();

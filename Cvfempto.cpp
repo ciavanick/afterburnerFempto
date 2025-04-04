@@ -2,6 +2,19 @@
 #include "TRandom.h"
 
 void vfempto::doInteractAll(std::vector<particleMC>& part, bool doScattering, bool doCoal){
+  unsigned long npart = part.size();
+
+  doInteractAllStep(0, part, doScattering, doCoal);
+
+  for(int i=1; i < mNmaxSteps; i++){
+    if(part.size() > npart){ // go ahead only if new particles were produced via coalescence
+      npart = part.size();
+      doInteractAllStep(i, part, false, doCoal);
+    }
+  }
+}
+//_________________________________________________________________________
+void vfempto::doInteractAllStep(int step, std::vector<particleMC>& part, bool doScattering, bool doCoal){
   if(! mIsInitialized){
     init();
   }
@@ -101,8 +114,14 @@ void vfempto::doInteractAll(std::vector<particleMC>& part, bool doScattering, bo
     mHsizeGroup->Fill(o.size());
     for(int i1 = 0; i1 < o.size(); i1++){
       particleMC& original1 = part[o[i1]];
+      if(original1.daughters.size()){
+        continue;
+      }
       for(int i2 = i1+1; i2 < o.size(); i2++){
         particleMC& original2 = part[o[i2]];
+        if(original2.daughters.size()){
+          continue;
+        }
 
 /*
         if(o.size() > 8){
@@ -110,8 +129,14 @@ void vfempto::doInteractAll(std::vector<particleMC>& part, bool doScattering, bo
           printf("%d/%d) k* = %f\n",i1,i2,ks);
         }
 */
+
+        float chargeCoulomb = original1.ColoumbC*original2.ColoumbC;
+        float chargeStrong = original1.StrongC*original2.StrongC;
+        if(! set(original1,original2, chargeCoulomb, chargeStrong)){
+          continue;
+        }
         // check and mark for coalescence
-        if(isCoalescence(original1,original2)){
+        if(o2[i1] < 0 && o2[i2] < 0 && isCoalescence(original1,original2,step)){
           if(o2[i1] < 0 && o2[i2] < 0) { // new cluster
             o2[i1] = nclusters;
             o2[i2] = nclusters;
@@ -132,7 +157,7 @@ void vfempto::doInteractAll(std::vector<particleMC>& part, bool doScattering, bo
 
         // interact
         if(doScattering){
-          doInteract(original1,original2,original1.ColoumbC*original2.ColoumbC,original1.StrongC*original2.StrongC,0);
+          doInteract(original1,original2,chargeCoulomb,chargeStrong,0);
         }
         // ------------------------------
       }
@@ -156,6 +181,10 @@ void vfempto::doInteractAll(std::vector<particleMC>& part, bool doScattering, bo
       int newpart = part.size();
       int npro = 0;
       int nneu = 0;
+      int ndeu = 0;
+      int ntri = 0;
+      int nhe = 0;
+
       for(const auto& o : mergeable){ // count nucleons
         particleMC& p = part[o];
         if(std::abs(p.pdg) == 2212) {
@@ -164,9 +193,18 @@ void vfempto::doInteractAll(std::vector<particleMC>& part, bool doScattering, bo
         if(std::abs(p.pdg) == 2112) {
           nneu++;
         }
+        if(std::abs(p.pdg) == 4324) {
+          ndeu++;
+        }
+        if(std::abs(p.pdg) == 6436) {
+          ntri++;
+        }
+        if(std::abs(p.pdg) == 6536) {
+          nhe++;
+        }
       }
-      int A = npro + nneu;
-      if(A == 2 && npro == 1){ // detueron
+      int A = npro + nneu + ndeu*2 + ntri*3 + nhe*3;
+      if(1){ // detueron
         particleMC& p1 = part[mergeable[0]];
         particleMC& p2 = part[mergeable[1]];
         particleMC merged = merge(p1,p2);
@@ -286,8 +324,23 @@ float vfempto::getCoalProb(const particleMC& p1, const particleMC& p2) {
   return TMath::Exp(-kstar/0.05);
 }
 //_________________________________________________________________________
-bool vfempto::isCoalescence(const particleMC& p1, const particleMC& p2) {
+bool vfempto::isCoalescence(const particleMC& p1, const particleMC& p2, int step) {
   if(p1.pdg * p2.pdg < 0){ // baryon + antibaryon
+    return false;
+  }
+
+  int pdgMax = std::abs(p1.pdg);
+  if(std::abs(p2.pdg) > pdgMax){
+    pdgMax = std::abs(p2.pdg);
+  }
+
+  if(step > 0 && pdgMax < 3000){ // baryon-baryon allowed only at step 0
+    return false;
+  }
+  if(step > 1 && pdgMax < 5000){ // D-baryon allowed only at step 1
+    return false;
+  }
+  if(step > 3){ // only 3 steps foreseen
     return false;
   }
 

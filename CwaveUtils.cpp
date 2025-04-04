@@ -187,7 +187,7 @@ void waveUtils::setKstar(float kstar, float kt, type system) {
 //  setNuclearRadius(radiusStrong);
 
   if(mSourceRadius < 0){
-    float radiusSource = std::abs(mSourceRadius/kt);
+    float radiusSource = std::abs(mSourceRadius);///kt);
     static const float factor = sqrt(3*0.5) * HCUT;
     float radiusWave = factor/kstar;
     float radius = sqrt(radiusWave*radiusWave + radiusSource*radiusSource);
@@ -499,7 +499,50 @@ float waveUtils::getCoalProb(const particleMC& p1, const particleMC& p2) {
   double kstar = utils::getKstar(p1,p2) * 1E3; // to MeV
   double kt = utils::getKt(p1,p2); // in GeV
 
-  setKstar(kstar,kt);
+  int pdgM = std::abs(p1.pdg);
+  int pdgL = std::abs(p2.pdg);
+
+  if(pdgM < pdgL){
+    int dummy = pdgL;
+    pdgL = pdgM;
+    pdgM = dummy;
+  }
+  waveUtils::type system=waveUtils::none;
+  if(pdgM == 2112){ // nn
+    system = waveUtils::nn;
+  } else if (pdgM == 2212) { // pn or pp
+    if(pdgL == 2112){
+      system = waveUtils::pn;
+    } else {
+      system = waveUtils::pp;
+    }
+  } else if(pdgM == 4324) { // Dn or Dp or DD
+    if(pdgL == 2112){
+      system = waveUtils::Dn;
+    } else if(pdgL == 2212){
+      system = waveUtils::Dp;
+    } else {
+      system = waveUtils::DD;
+    }
+  } else if(pdgM == 6436) { // Tn or Tp
+    if(pdgL == 2112){
+      system = waveUtils::Tn;
+    } else if(pdgL == 2212){
+      system = waveUtils::Tp;
+    }
+  } else if(pdgM == 6536) { // 3Hen o 3Hep
+    if(pdgL == 2112){
+      system = waveUtils::Hen;
+    } else if(pdgL == 2212){
+      system = waveUtils::Hep;
+    }
+  }
+
+  if(system == waveUtils::none){
+    return 0;
+  }
+
+  setKstar(kstar,kt,system);
 
   return calcProb();
 }

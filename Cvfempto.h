@@ -8,9 +8,11 @@ class vfempto
 {
   public:
     virtual double doInteract(particleMC& p1, particleMC& p2, float chargeColoumb, float chargeStrong, float sumRadii = 0, float *pos=nullptr, float *posLab=nullptr); // perform interaction and return momentum exchanged
-    bool isCoalescence(const particleMC& p1, const particleMC& p2);
+    bool isCoalescence(const particleMC& p1, const particleMC& p2, int step=0);
     virtual float getCoalProb(const particleMC& p1, const particleMC& p2);
+    virtual bool set(particleMC& p1, particleMC& p2, float chargeColoumb, float chargeStrong) { return true; }
     virtual void doInteractAll(std::vector<particleMC>& part, bool doScattering = true, bool doCoal = true);
+    virtual void doInteractAllStep(int step, std::vector<particleMC>& part, bool doScattering = true, bool doCoal = true);
     virtual void init() { mIsInitialized = true; };
     virtual void setThreshold(double threshold){mThreshold = threshold;}
 
@@ -21,7 +23,8 @@ class vfempto
     float getSourceRadius() const { return mSourceRadius; }
     TH1F* getHistoGroup() { return mHsizeGroup; }
     TH1F* getHistoMerge() { return mHsizeMerge; }
-    
+    int getNmaxSteps() const { return mNmaxSteps; }
+    void setNmaxSteps(int val) { mNmaxSteps = val; }
   protected:
     float mStrong = 2.2E-3;      // attractive potential
     float mStrongR = 2.4;        // radius of box potential
@@ -30,7 +33,7 @@ class vfempto
     float mSpinCoalFactor = 3./8;
     bool mIsInitialized = false;
     double mThreshold = 0.4;
-
+    int mNmaxSteps = 3;
     particleMC merge(const particleMC& p1, const particleMC& p2);
 
   private:
