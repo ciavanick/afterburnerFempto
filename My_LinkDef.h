@@ -18,5 +18,6 @@
 #pragma link C++ class readerFE++;
 
 #pragma link C++ class vrun++;
+#pragma link C++ class runSpectrum++;
 
 #endif
