@@ -2,10 +2,10 @@
 
 double utils::getMass(int pdg){
   double mass = 0;
-  const double bindingDe = 2.22;
-  const double bindingTr = 8.482;
-  const double bindingHe3 = 7.714;
-  const double bindingHe4 = 28.3;
+  const double bindingDe = 2.22E-3;
+  const double bindingTr = 8.482E-3;
+  const double bindingHe3 = 7.714E-3;
+  const double bindingHe4 = 28.3E-3;
 
   uint pdgAbs = std::abs(pdg);
   if(pdgAbs < 4000){
