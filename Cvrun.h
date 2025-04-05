@@ -35,8 +35,8 @@ class vrun
     virtual void finalizeHistos();
     virtual int selectP1(const particleCand& p);
     virtual int selectP2(const particleCand& p);
-  private:
     TString mName = "";
+  private:
     int mNmix;       // number of mixed events, max is MAXMIXEDEVENTS
     std::vector<particleCand> mEvPrev[MAXMIXEDEVENTS];
     TH2D *mHkstarSE;
