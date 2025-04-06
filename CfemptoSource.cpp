@@ -74,32 +74,40 @@ double femptoSource::doInteract(particleMC& p1, particleMC& p2, float chargeColo
     pdgM = dummy;
   }
 
+  bool coalAllow = false;
+
   waveUtils::type system=waveUtils::none;
   if(pdgM == 2112){ // nn
     system = waveUtils::nn;
   } else if (pdgM == 2212) { // pn or pp
     if(pdgL == 2112){
       system = waveUtils::pn;
+      coalAllow = true;
     } else {
       system = waveUtils::pp;
     }
   } else if(pdgM == 4324) { // Dn or Dp or DD
     if(pdgL == 2112){
       system = waveUtils::Dn;
+      coalAllow = true;
     } else if(pdgL == 2212){
       system = waveUtils::Dp;
+      coalAllow = true;
     } else {
       system = waveUtils::DD;
+      coalAllow = true;
     }
   } else if(pdgM == 6436) { // Tn or Tp
     if(pdgL == 2112){
       system = waveUtils::Tn;
     } else if(pdgL == 2212){
       system = waveUtils::Tp;
+      coalAllow = true;
     }
   } else if(pdgM == 6536) { // 3Hen o 3Hep
     if(pdgL == 2112){
       system = waveUtils::Hen;
+      coalAllow = true;
     } else if(pdgL == 2212){
       system = waveUtils::Hep;
     }
@@ -135,7 +143,7 @@ double femptoSource::doInteract(particleMC& p1, particleMC& p2, float chargeColo
   p2.q.Boost(bInv);
 
   float coalProb = 0;
-  if(std::abs(chargeStrong) > 0.9 && std::abs(chargeColoumb) < 1E-3) { // coalescence allowed
+  if(coalAllow) {
     coalProb = calcProb();
   }
 
