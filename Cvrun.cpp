@@ -29,8 +29,9 @@ void vrun::initHistos(){
   mDPhiDEtaME = new TH2D("mDPhiDEtaME" + mName,"Mixed Event;#Delta#eta;#Delta#Phi;N(#Delta#Phi)",40,-2,2,20,-TMath::Pi()*0.5,TMath::Pi()*3*0.5);
 }
 void vrun::initEventsHisto(){
-  mEvents = new TH1D("mEvents" + mName, "Number of events", 5, 0, 5);
+  mEvents = new TH1D("mEvents" + mName, "Number of events", 2, 0, 2);
   mEvents->Fill("Number of Events", 0);
+  mEvents->Fill("Number of accepted Events", 0);
 }
 //_________________________________________________________________________
 void vrun::finalize(){
@@ -192,9 +193,10 @@ TH2D* vrun::getDPhiDEtaME(){
 }
 //_________________________________________________________________________
 void vrun::doAnalysis(){
+  mEvents->Fill("Number of Events", 1);
   auto selectionCondition = applyCuts();
   if(selectionCondition == true) {
-    mEvents->Fill("Number of Events", 1);
+    mEvents->Fill("Number of accepted Events", 1);
     process();
   }
 }

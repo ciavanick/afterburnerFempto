@@ -10,8 +10,9 @@ void runSpectrum::initHistos()
 //_________________________________________________________________________
 void runSpectrum::initEventsHisto()
 {
-    mEvents = new TH1D("mEvents" + mName, "Number of events", 5, 0, 5);
+    mEvents = new TH1D("mEvents" + mName, "Number of events", 6, 0, 6);
     mEvents->Fill("Number of Events", 0);
+    mEvents->Fill("Number of accepted Events", 0);
     mEvents->Fill("Selected Particles", 0);
     mEvents->Fill("Selected Protons", 0);
     mEvents->Fill("Selected Neutrons", 0);
