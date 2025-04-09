@@ -1,33 +1,64 @@
 #include "CrunSpectrum.h"
 #include "TFile.h"
 
-void runSpectrum::initSpectrum(){
-    mHSpectrum = new TH1D("mHSpectrum" + mName, "Spectrum;p_{T} (GeV/c)",100, 0, 10);
-    mNEvents = new TH1D("mNEvents" + mName, "Number of events",1, 0.5, 1.5);
+void runSpectrum::initHistos()
+{
+    mHProtonSpectrum = new TH1D("mHProtonSpectrum" + mName, "Spectrum;p_{T} (GeV/c)", 62, 0.4, 3.5);
+    mHNeutronSpectrum = new TH1D("mHNeutronSpectrum" + mName, "Spectrum;p_{T} (GeV/c)", 62, 0.4, 3.5);
+    mHDeuteronSpectrum = new TH1D("mHDeuteronSpectrum" + mName, "Spectrum;p_{T} (GeV/c)", 31, 0.4, 3.5);
 }
 //_________________________________________________________________________
-void runSpectrum::process(){
-    for(int i=0; i < mVect.size(); ++i){
-        const particleCand& p = mVect[i];
-        for(int j=0; j < p.pdgOptions.size(); ++j){
-            if(std::abs(p.q[j].Eta()) < 1){
-                if(p.pdgOptions[j] == mPDG){
-                    mHSpectrum->Fill(p.q[j].Pt());
-                }
+void runSpectrum::initEventsHisto()
+{
+    mEvents = new TH1D("mEvents" + mName, "Number of events", 5, 0, 5);
+    mEvents->Fill("Number of Events", 0);
+    mEvents->Fill("Selected Particles", 0);
+    mEvents->Fill("Selected Protons", 0);
+    mEvents->Fill("Selected Neutrons", 0);
+    mEvents->Fill("Selected Deuterons", 0);
+}
+//_________________________________________________________________________
+void runSpectrum::process()
+{
+    for (int i = 0; i < mVect.size(); ++i)
+    {
+        const particleCand &p = mVect[i];
+        int ipdg = selectP(p);
+        if (ipdg == -1)
+                continue;
+        if (std::abs(p.q[ipdg].Rapidity()) < 0.5)
+        {
+            mEvents->Fill("Selected Particles", 1);
+            if (p.pdgOptions[ipdg] == mPDGPr)
+            {
+                mEvents->Fill("Selected Protons", 1);
+                mHProtonSpectrum->Fill(p.q[ipdg].Pt());
+            }else if(p.pdgOptions[ipdg] == mPDGNe){
+                mEvents->Fill("Selected Neutrons", 1);
+                mHNeutronSpectrum->Fill(p.q[ipdg].Pt());
+            }else if(p.pdgOptions[ipdg] == mPDGDe){
+                mEvents->Fill("Selected Deuterons", 1);
+                mHDeuteronSpectrum->Fill(p.q[ipdg].Pt());
             }
         }
     }
-    mNEvents->Fill(1);
 }
 //_________________________________________________________________________
-void runSpectrum::write(){
-  gFile->mkdir("runSpectrum" + mName);
-  gFile->cd("runSpectrum" + mName);
-  mHSpectrum->Write();
-  mNEvents->Write();
-  gFile->cd();
+void runSpectrum::writeHistos()
+{
+    mHProtonSpectrum->Write();
+    mHNeutronSpectrum->Write();
+    mHDeuteronSpectrum->Write();
 }
 //_________________________________________________________________________
-void runSpectrum::setPDG(int pdg){
-    mPDG = pdg;
+int runSpectrum::selectP(const particleCand &p)
+{
+    for (int i = 0; i < p.pdgOptions.size(); ++i)
+    {
+        if (p.pdgOptions[i] == mPDGPr || p.pdgOptions[i] == mPDGNe || p.pdgOptions[i] == mPDGDe)
+        {
+            return i;
+        }
+    }
+    return -1;
 }

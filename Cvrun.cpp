@@ -19,13 +19,18 @@ void vrun::setIDName(const TString& name){
 //_________________________________________________________________________
 void vrun::init(){
   initHistos();
+  initEventsHisto();
 }
 //_________________________________________________________________________
 void vrun::initHistos(){
-    mHkstarSE = new TH2D("mHkstarSE" + mName,"Same Event;k_{T} (GeV/c);k* (MeV/c);N(k*)",10,0,2,100,0,1);
-    mHkstarME = new TH2D("mHkstarME" + mName,"Mixed Events;k_{T} (GeV/c);k* (MeV/c);N(k*)",10,0,2,100,0,1);
-    mDPhiDEtaSE = new TH2D("mDPhiDEtaSE" + mName,"Same Event;#Delta#eta;#Delta#Phi;N(#Delta#Phi)",40,-2,2,20,-TMath::Pi()*0.5,TMath::Pi()*3*0.5);
-    mDPhiDEtaME = new TH2D("mDPhiDEtaME" + mName,"Mixed Event;#Delta#eta;#Delta#Phi;N(#Delta#Phi)",40,-2,2,20,-TMath::Pi()*0.5,TMath::Pi()*3*0.5);
+  mHkstarSE = new TH2D("mHkstarSE" + mName,"Same Event;k_{T} (GeV/c);k* (MeV/c);N(k*)",10,0,2,100,0,1);
+  mHkstarME = new TH2D("mHkstarME" + mName,"Mixed Events;k_{T} (GeV/c);k* (MeV/c);N(k*)",10,0,2,100,0,1);
+  mDPhiDEtaSE = new TH2D("mDPhiDEtaSE" + mName,"Same Event;#Delta#eta;#Delta#Phi;N(#Delta#Phi)",40,-2,2,20,-TMath::Pi()*0.5,TMath::Pi()*3*0.5);
+  mDPhiDEtaME = new TH2D("mDPhiDEtaME" + mName,"Mixed Event;#Delta#eta;#Delta#Phi;N(#Delta#Phi)",40,-2,2,20,-TMath::Pi()*0.5,TMath::Pi()*3*0.5);
+}
+void vrun::initEventsHisto(){
+  mEvents = new TH1D("mEvents" + mName, "Number of events", 5, 0, 5);
+  mEvents->Fill("Number of Events", 0);
 }
 //_________________________________________________________________________
 void vrun::finalize(){
@@ -35,13 +40,26 @@ void vrun::finalize(){
 void vrun::finalizeHistos(){
 }
 //_________________________________________________________________________
-void vrun::write(){
-  gFile->mkdir("vrun" + mName);
-  gFile->cd("vrun" + mName);
+bool vrun::applyCuts(){
+  return true;
+}
+//_________________________________________________________________________
+void vrun::writeHistos(){
   mHkstarSE->Write();
   mHkstarME->Write();
   mDPhiDEtaSE->Write();
   mDPhiDEtaME->Write();
+}
+//_________________________________________________________________________
+void vrun::writeEventsHisto(){
+  mEvents->Write();
+}
+//_________________________________________________________________________
+void vrun::write(){
+  gFile->mkdir(mDirID + mName);
+  gFile->cd(mDirID + mName);
+  writeHistos();
+  writeEventsHisto();
   gFile->cd();
 }
 //_________________________________________________________________________
@@ -172,4 +190,11 @@ TH2D* vrun::getDPhiDEtaSE(){
 TH2D* vrun::getDPhiDEtaME(){
   return mDPhiDEtaME;
 }
-
+//_________________________________________________________________________
+void vrun::doAnalysis(){
+  auto selectionCondition = applyCuts();
+  if(selectionCondition == true) {
+    mEvents->Fill("Number of Events", 1);
+    process();
+  }
+}
