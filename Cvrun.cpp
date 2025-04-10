@@ -19,13 +19,19 @@ void vrun::setIDName(const TString& name){
 //_________________________________________________________________________
 void vrun::init(){
   initHistos();
+  initEventsHisto();
 }
 //_________________________________________________________________________
 void vrun::initHistos(){
-    mHkstarSE = new TH2D("mHkstarSE" + mName,"Same Event;k_{T} (GeV/c);k* (MeV/c);N(k*)",10,0,2,100,0,1);
-    mHkstarME = new TH2D("mHkstarME" + mName,"Mixed Events;k_{T} (GeV/c);k* (MeV/c);N(k*)",10,0,2,100,0,1);
-    mDPhiDEtaSE = new TH2D("mDPhiDEtaSE" + mName,"Same Event;#Delta#eta;#Delta#Phi;N(#Delta#Phi)",40,-2,2,20,-TMath::Pi()*0.5,TMath::Pi()*3*0.5);
-    mDPhiDEtaME = new TH2D("mDPhiDEtaME" + mName,"Mixed Event;#Delta#eta;#Delta#Phi;N(#Delta#Phi)",40,-2,2,20,-TMath::Pi()*0.5,TMath::Pi()*3*0.5);
+  mHkstarSE = new TH2D("mHkstarSE" + mName,"Same Event;k_{T} (GeV/c);k* (MeV/c);N(k*)",10,0,2,100,0,1);
+  mHkstarME = new TH2D("mHkstarME" + mName,"Mixed Events;k_{T} (GeV/c);k* (MeV/c);N(k*)",10,0,2,100,0,1);
+  mDPhiDEtaSE = new TH2D("mDPhiDEtaSE" + mName,"Same Event;#Delta#eta;#Delta#Phi;N(#Delta#Phi)",40,-2,2,20,-TMath::Pi()*0.5,TMath::Pi()*3*0.5);
+  mDPhiDEtaME = new TH2D("mDPhiDEtaME" + mName,"Mixed Event;#Delta#eta;#Delta#Phi;N(#Delta#Phi)",40,-2,2,20,-TMath::Pi()*0.5,TMath::Pi()*3*0.5);
+}
+void vrun::initEventsHisto(){
+  mEvents = new TH1D("mEvents" + mName, "Number of events", 2, 0, 2);
+  mEvents->Fill("Number of Events", 0);
+  mEvents->Fill("Number of accepted Events", 0);
 }
 //_________________________________________________________________________
 void vrun::finalize(){
@@ -35,13 +41,26 @@ void vrun::finalize(){
 void vrun::finalizeHistos(){
 }
 //_________________________________________________________________________
-void vrun::write(){
-  gFile->mkdir("vrun" + mName);
-  gFile->cd("vrun" + mName);
+bool vrun::applyCuts(){
+  return true;
+}
+//_________________________________________________________________________
+void vrun::writeHistos(){
   mHkstarSE->Write();
   mHkstarME->Write();
   mDPhiDEtaSE->Write();
   mDPhiDEtaME->Write();
+}
+//_________________________________________________________________________
+void vrun::writeEventsHisto(){
+  mEvents->Write();
+}
+//_________________________________________________________________________
+void vrun::write(){
+  gFile->mkdir(mDirID + mName);
+  gFile->cd(mDirID + mName);
+  writeHistos();
+  writeEventsHisto();
   gFile->cd();
 }
 //_________________________________________________________________________
@@ -81,10 +100,7 @@ void vrun::process(){
       bool conditionPt2 = (p2.q[ipdg2].Pt() > 0.4 && p2.q[ipdg2].Pt() < 1.);
 
       if(conditionEta1 && conditionEta2 && conditionPt1 && conditionPt2){
-        double rangeMin = -TMath::Pi()*0.5;
-        double rangeMax = TMath::Pi()*3*0.5;
-        double shift = TMath::Pi()*2;
-        double dPhi = utils::getDPhi(p1,p2,ipdg1,ipdg2,rangeMin,rangeMax,shift);
+        double dPhi = utils::getDPhi(p1,p2,ipdg1,ipdg2);
         double dEta = utils::getDEta(p1,p2,ipdg1,ipdg2);
 
         mDPhiDEtaSE->Fill(dEta, dPhi);
@@ -124,10 +140,7 @@ void vrun::process(){
            bool conditionPt2 = (p2.q[ipdg2].Pt() > 0.4 && p2.q[ipdg2].Pt() < 1.);
 
            if(conditionEta1 && conditionEta2 && conditionPt1 && conditionPt2){
-            double rangeMin = -TMath::Pi()*0.5;
-            double rangeMax = TMath::Pi()*3*0.5;
-            double shift = TMath::Pi()*2;
-            double dPhi = utils::getDPhi(p1,p2,ipdg1,ipdg2,rangeMin,rangeMax,shift);
+            double dPhi = utils::getDPhi(p1,p2,ipdg1,ipdg2);
             double dEta = utils::getDEta(p1,p2,ipdg1,ipdg2);
 
             mDPhiDEtaME->Fill(dEta, dPhi);
@@ -178,4 +191,12 @@ TH2D* vrun::getDPhiDEtaSE(){
 TH2D* vrun::getDPhiDEtaME(){
   return mDPhiDEtaME;
 }
-
+//_________________________________________________________________________
+void vrun::doAnalysis(){
+  mEvents->Fill("Number of Events", 1);
+  auto selectionCondition = applyCuts();
+  if(selectionCondition == true) {
+    mEvents->Fill("Number of accepted Events", 1);
+    process();
+  }
+}

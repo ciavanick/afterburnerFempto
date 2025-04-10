@@ -11,16 +11,15 @@
 class vrun
 {
   public:
-    vrun(int nmix=10) : mNmix(TMath::Min(nmix,MAXMIXEDEVENTS)) {}
+    vrun(int nmix=10, TString dirName = "vrun") : mNmix(TMath::Min(nmix,MAXMIXEDEVENTS)), mDirID(dirName) {}
 
     void setNmixedEvents(int nmix) { mNmix = TMath::Min(nmix,MAXMIXEDEVENTS); }
     void init();
 //    void setEvent(your custom input);
     void setEvent(const std::vector<particleMC>& vect);     // to be defined for your special input but then it should be mapped on particleCand
     void setIDName(const TString& name);
-    virtual void process();
     virtual void finalize();
-    virtual void write();
+    void write();
 
     void selectPDG(int pdg1, int pdg2) { mPDG1 = pdg1, mPDG2 = pdg2, mIsSamePart = (pdg1 == pdg2); }
 
@@ -29,14 +28,23 @@ class vrun
     virtual TH2D* getDPhiDEtaSE();
     virtual TH2D* getDPhiDEtaME();
 
+    void doAnalysis();
+
   protected:
     std::vector<particleCand> mVect;
+    virtual void process();
     virtual void initHistos();
+    virtual void initEventsHisto();
     virtual void finalizeHistos();
+    virtual bool applyCuts();
     virtual int selectP1(const particleCand& p);
     virtual int selectP2(const particleCand& p);
-  private:
+    virtual void writeHistos();
+    virtual void writeEventsHisto();
+    TString mDirID;
     TString mName = "";
+    TH1D *mEvents = nullptr;
+  private:
     int mNmix;       // number of mixed events, max is MAXMIXEDEVENTS
     std::vector<particleCand> mEvPrev[MAXMIXEDEVENTS];
     TH2D *mHkstarSE;
