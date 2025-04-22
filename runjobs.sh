@@ -14,6 +14,28 @@ if [[ -z "$input_folder" || -z "$n_jobs" || -z "$macro_name" || -z "$output_fold
   exit 1
 fi
 
+# Determine available CPU cores (macOS or Linux)
+if command -v nproc &> /dev/null; then
+  available_cores=$(nproc)
+elif command -v sysctl &> /dev/null; then
+  available_cores=$(sysctl -n hw.ncpu)
+else
+  echo "Warning: Cannot determine number of CPU cores. Defaulting to 1."
+  available_cores=1
+fi
+
+# Validate number of jobs
+if ! [[ "$n_jobs" =~ ^[0-9]+$ ]]; then
+  echo "Error: <number_of_jobs> must be a positive integer."
+  exit 1
+fi
+
+if (( n_jobs > available_cores )); then
+  echo "Error: Requested number of jobs ($n_jobs) exceeds available CPU cores ($available_cores)."
+  echo "Please reduce the number of jobs to $available_cores or fewer."
+  exit 1
+fi
+
 # Create working and output directories
 work_dir="$output_folder/job_lists"
 mkdir -p "$work_dir"
