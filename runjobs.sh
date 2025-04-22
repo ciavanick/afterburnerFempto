@@ -83,8 +83,8 @@ files=$(ls *.root 2>/dev/null)
 base_names=$(echo "$files" | sed -E 's/_[0-9]+\.root$//' | sort | uniq)
 
 for base in $base_names; do
-  pattern="${base}_[0-9].root"
-  final="${base##*/}.root"  # Extract only the filename part (in case of paths)
+  pattern="${base}_[0-9]*.root"
+  final="${base##*/}.root"
   
   echo "Merging files matching: $pattern → $final"
   hadd -f "$final" $pattern
