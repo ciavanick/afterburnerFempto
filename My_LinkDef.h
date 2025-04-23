@@ -20,5 +20,7 @@
 
 #pragma link C++ class vrun++;
 #pragma link C++ class runSpectrum++;
+#pragma link C++ class wignerUtils++;
+#pragma link C++ class wignerSource++;
 
 #endif
