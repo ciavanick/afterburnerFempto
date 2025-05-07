@@ -15,6 +15,19 @@ void runSpectrum::initHistos()
     mHTritiumSpectrumA = new TH1D("mHTritiumSpectrumA" + mName, "Spectrum;p_{T}/A (GeV/c)", 100, 0., 10.);
     mHHelium3SpectrumA = new TH1D("mHHelium3SpectrumA" + mName, "Spectrum;p_{T}/A (GeV/c)", 100, 0., 10.);
     mHHelium4SpectrumA = new TH1D("mHHelium4SpectrumA" + mName, "Spectrum;p_{T}/A (GeV/c)", 100, 0., 10.);
+
+    mHAntiProtonSpectrum = new TH1D("mHAntiProtonSpectrum" + mName, "Spectrum;p_{T} (GeV/c)", 100, 0., 10.);
+    mHAntiNeutronSpectrum = new TH1D("mHAntiNeutronSpectrum" + mName, "Spectrum;p_{T} (GeV/c)", 100, 0., 10.);
+    mHAntiDeuteronSpectrum = new TH1D("mHAntiDeuteronSpectrum" + mName, "Spectrum;p_{T} (GeV/c)", 100, 0., 10.);
+    mHAntiTritiumSpectrum = new TH1D("mHAntiTritiumSpectrum" + mName, "Spectrum;p_{T} (GeV/c)", 100, 0., 10.);
+    mHAntiHelium3Spectrum = new TH1D("mHAntiHelium3Spectrum" + mName, "Spectrum;p_{T} (GeV/c)", 100, 0., 10.);
+    mHAntiHelium4Spectrum = new TH1D("mHAntiHelium4Spectrum" + mName, "Spectrum;p_{T} (GeV/c)", 100, 0., 10.);
+    mHAntiProtonSpectrumA = new TH1D("mHAntiProtonSpectrumA" + mName, "Spectrum;p_{T}/A (GeV/c)", 100, 0., 10.);
+    mHAntiNeutronSpectrumA = new TH1D("mHAntiNeutronSpectrumA" + mName, "Spectrum;p_{T}/A (GeV/c)", 100, 0., 10.);
+    mHAntiDeuteronSpectrumA = new TH1D("mHAntiDeuteronSpectrumA" + mName, "Spectrum;p_{T}/A (GeV/c)", 100, 0., 10.);
+    mHAntiTritiumSpectrumA = new TH1D("mHAntiTritiumSpectrumA" + mName, "Spectrum;p_{T}/A (GeV/c)", 100, 0., 10.);
+    mHAntiHelium3SpectrumA = new TH1D("mHAntiHelium3SpectrumA" + mName, "Spectrum;p_{T}/A (GeV/c)", 100, 0., 10.);
+    mHAntiHelium4SpectrumA = new TH1D("mHAntiHelium4SpectrumA" + mName, "Spectrum;p_{T}/A (GeV/c)", 100, 0., 10.);
 }
 //_________________________________________________________________________
 void runSpectrum::initEventsHisto()
@@ -29,6 +42,12 @@ void runSpectrum::initEventsHisto()
     mEvents->Fill("Selected Tritons", 0);
     mEvents->Fill("Selected Helium3", 0);
     mEvents->Fill("Selected Helium4", 0);
+    mEvents->Fill("Selected Antiprotons", 0);
+    mEvents->Fill("Selected Antineutrons", 0);
+    mEvents->Fill("Selected Antideuterons", 0);
+    mEvents->Fill("Selected Antitritons", 0);
+    mEvents->Fill("Selected Antihelium3", 0);
+    mEvents->Fill("Selected Antihelium4", 0);
 }
 //_________________________________________________________________________
 void runSpectrum::process()
@@ -67,6 +86,30 @@ void runSpectrum::process()
                 mEvents->Fill("Selected Helium4", 1);
                 mHHelium4Spectrum->Fill(p.q[ipdg].Pt());
                 mHHelium4SpectrumA->Fill(p.q[ipdg].Pt()/4);
+            }else if (p.pdgOptions[ipdg] == mPDGAntiPr){
+                mEvents->Fill("Selected Antiprotons", 1);
+                mHAntiProtonSpectrum->Fill(p.q[ipdg].Pt());
+                mHAntiProtonSpectrumA->Fill(p.q[ipdg].Pt());
+            }else if(p.pdgOptions[ipdg] == mPDGAntiNe){
+                mEvents->Fill("Selected Antineutrons", 1);
+                mHAntiNeutronSpectrum->Fill(p.q[ipdg].Pt());
+                mHAntiNeutronSpectrumA->Fill(p.q[ipdg].Pt());
+            }else if(p.pdgOptions[ipdg] == mPDGAntiDe){
+                mEvents->Fill("Selected Antideuterons", 1);
+                mHAntiDeuteronSpectrum->Fill(p.q[ipdg].Pt());
+                mHAntiDeuteronSpectrumA->Fill(p.q[ipdg].Pt()/2);
+            }else if(p.pdgOptions[ipdg] == mPDGAntiT){
+                mEvents->Fill("Selected Antitritons", 1);
+                mHAntiTritiumSpectrum->Fill(p.q[ipdg].Pt());
+                mHAntiTritiumSpectrumA->Fill(p.q[ipdg].Pt()/3);
+            }else if(p.pdgOptions[ipdg] == mPDGAntiHe3){
+                mEvents->Fill("Selected Antihelium3", 1);
+                mHAntiHelium3Spectrum->Fill(p.q[ipdg].Pt());
+                mHAntiHelium3SpectrumA->Fill(p.q[ipdg].Pt()/3);
+            }else if(p.pdgOptions[ipdg] == mPDGAntiHe4){
+                mEvents->Fill("Selected Antihelium4", 1);
+                mHAntiHelium4Spectrum->Fill(p.q[ipdg].Pt());
+                mHAntiHelium4SpectrumA->Fill(p.q[ipdg].Pt()/4);
             }
         }
     }
@@ -86,13 +129,27 @@ void runSpectrum::writeHistos()
     mHTritiumSpectrumA->Write();
     mHHelium3SpectrumA->Write();
     mHHelium4SpectrumA->Write();
+    mHAntiProtonSpectrum->Write();
+    mHAntiNeutronSpectrum->Write();
+    mHAntiDeuteronSpectrum->Write();
+    mHAntiTritiumSpectrum->Write();
+    mHAntiHelium3Spectrum->Write();
+    mHAntiHelium4Spectrum->Write();
+    mHAntiProtonSpectrumA->Write();
+    mHAntiNeutronSpectrumA->Write();
+    mHAntiDeuteronSpectrumA->Write();
+    mHAntiTritiumSpectrumA->Write();
+    mHAntiHelium3SpectrumA->Write();
+    mHAntiHelium4SpectrumA->Write();
 }
 //_________________________________________________________________________
 int runSpectrum::selectP(const particleCand &p)
 {
     for (int i = 0; i < p.pdgOptions.size(); ++i)
     {
-        if (p.pdgOptions[i] == mPDGPr || p.pdgOptions[i] == mPDGNe || p.pdgOptions[i] == mPDGDe || p.pdgOptions[i] == mPDGT || p.pdgOptions[i] == mPDGHe3 || p.pdgOptions[i] == mPDGHe4)
+        bool particleCondition = p.pdgOptions[i] == mPDGPr || p.pdgOptions[i] == mPDGNe || p.pdgOptions[i] == mPDGDe || p.pdgOptions[i] == mPDGT || p.pdgOptions[i] == mPDGHe3 || p.pdgOptions[i] == mPDGHe4;
+        bool antiparticleCondition = p.pdgOptions[i] == mPDGAntiPr || p.pdgOptions[i] == mPDGAntiNe || p.pdgOptions[i] == mPDGAntiDe || p.pdgOptions[i] == mPDGAntiT || p.pdgOptions[i] == mPDGAntiHe3 || p.pdgOptions[i] == mPDGAntiHe4;
+        if (particleCondition || antiparticleCondition)
         {
             return i;
         }

@@ -23,6 +23,19 @@ class runSpectrum : public vrun
       TH1D *mHHelium3SpectrumA = nullptr;
       TH1D *mHHelium4SpectrumA = nullptr;
 
+      TH1D *mHAntiProtonSpectrum = nullptr;
+      TH1D *mHAntiNeutronSpectrum = nullptr;
+      TH1D *mHAntiDeuteronSpectrum = nullptr;
+      TH1D *mHAntiTritiumSpectrum = nullptr;
+      TH1D *mHAntiHelium3Spectrum = nullptr;
+      TH1D *mHAntiHelium4Spectrum = nullptr;
+      TH1D *mHAntiProtonSpectrumA = nullptr;
+      TH1D *mHAntiNeutronSpectrumA = nullptr;
+      TH1D *mHAntiDeuteronSpectrumA = nullptr;
+      TH1D *mHAntiTritiumSpectrumA = nullptr;
+      TH1D *mHAntiHelium3SpectrumA = nullptr;
+      TH1D *mHAntiHelium4SpectrumA = nullptr;
+
       void initHistos() override;
       void initEventsHisto() override;
       void process() override;
@@ -36,6 +49,13 @@ class runSpectrum : public vrun
       int mPDGT = 2212 + 2*2112;
       int mPDGHe3 = 2*2212 + 2112;
       int mPDGHe4 = 2*2212 + 2*2112;
+
+      int mPDGAntiPr = -2212;
+      int mPDGAntiNe = -2112;
+      int mPDGAntiDe = -4324;
+      int mPDGAntiT = -2212 - 2*2112;
+      int mPDGAntiHe3 = -2*2212 - 2112;
+      int mPDGAntiHe4 = -2*2212 - 2*2112;
 
 };
 
