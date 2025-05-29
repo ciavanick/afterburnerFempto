@@ -45,6 +45,21 @@ void analyseCorrelation(TString listname,  TString outfolder, TString outname)
   runAntiPrDe->selectPDG(pdgAntiPr, pdgAntiDe); // pdg of the two particles to be correlated
   runAntiPrDe->init();                  // init analysis
 
+  vrun *runPrAntiPr = new vrun(nmixedEvents);
+  runPrAntiPr->setIDName("PrAntiPr");
+  runPrAntiPr->selectPDG(pdgPr, pdgAntiPr); // pdg of the two particles to be correlated
+  runPrAntiPr->init();                  // init analysis
+
+  vrun *runPrAntiDe = new vrun(nmixedEvents);
+  runPrAntiDe->setIDName("PrAntiDe");
+  runPrAntiDe->selectPDG(pdgPr, pdgAntiDe); // pdg of the two particles to be correlated
+  runPrAntiDe->init();                  // init analysis
+
+  vrun *runDeAntiPr = new vrun(nmixedEvents);
+  runDeAntiPr->setIDName("DeAntiPr");
+  runDeAntiPr->selectPDG(pdgDe, pdgAntiPr); // pdg of the two particles to be correlated
+  runDeAntiPr->init();                  // init analysis
+
   vfempto *interactor = new femptoSource();
   // interactor->setParams(33.7, 2.1, 1.44, -1.5, 0.);
   interactor->setThreshold(0.4);
@@ -80,6 +95,15 @@ void analyseCorrelation(TString listname,  TString outfolder, TString outname)
 
     runAntiPrDe->setEvent(event); // pass the event to the analyzer
     runAntiPrDe->doAnalysis();       // process the event
+
+    runPrAntiPr->setEvent(event); // pass the event to the analyzer
+    runPrAntiPr->doAnalysis();       // process the event
+
+    runPrAntiDe->setEvent(event); // pass the event to the analyzer
+    runPrAntiDe->doAnalysis();       // process the event
+
+    runDeAntiPr->setEvent(event); // pass the event to the analyzer
+    runDeAntiPr->doAnalysis();       // process the event
   }
 
   // finalization
@@ -120,4 +144,22 @@ void analyseCorrelation(TString listname,  TString outfolder, TString outname)
   runAntiPrDe->write(); // write outputs of the analysis
   //hCorrelationPrNe->Write();
   foutAntiPrDe->Close();
+
+  runPrAntiPr->finalize(); // finalize the analysis
+  TFile *foutPrAntiPr = new TFile(outfolder + "pAntip_" + outname, "RECREATE");
+  runPrAntiPr->write(); // write outputs of the analysis
+  //hCorrelationPrNe->Write();
+  foutPrAntiPr->Close();
+
+  runPrAntiDe->finalize(); // finalize the analysis
+  TFile *foutPrAntiDe = new TFile(outfolder + "pAntid_" + outname, "RECREATE");
+  runPrAntiDe->write(); // write outputs of the analysis
+  //hCorrelationPrNe->Write();
+  foutPrAntiDe->Close();
+
+  runDeAntiPr->finalize(); // finalize the analysis
+  TFile *foutDeAntiPr = new TFile(outfolder + "dAntip_" + outname, "RECREATE");
+  runDeAntiPr->write(); // write outputs of the analysis
+  //hCorrelationPrNe->Write();
+  foutDeAntiPr->Close();
 }
