@@ -30,15 +30,16 @@ double wignerUtils::mRadius = 1.;
 double wignerUtils::mKStar = 0.050;
 double wignerUtils::mKin = 0.050;
 double wignerUtils::mNorm = 1.;
-double wignerUtils::mMu = 0.938/2;
-double wignerUtils::mRWidth = 3.2; //2.1
+double wignerUtils::mMu = 0.938 / 2;
+double wignerUtils::mRWidth = 3.2;  // 2.1
 double wignerUtils::mV0 = -17.4E-3; //-0.0337
-double wignerUtils::mBoundE = 2.2; //MeV
+double wignerUtils::mBoundE = 2.2;  // MeV
 
 TFile *wignerUtils::mFileDeuteron = new TFile("deuteronFunction/wigner2.root", "READ");
 TH2D *wignerUtils::mDeuteronH = (TH2D *)mFileDeuteron->Get("h");
 //_________________________________________________________________________
-void wignerUtils::init(){
+void wignerUtils::init()
+{
     mW = new TF2("w", wignerSource, mRMin, mRMax, mPMin, mPMax, 3);
     mWxJ = new TF2("wxj", jacobianFun, mRMin, mRMax, mPMin, mPMax, 3);
     mWxJforItself = new TF2("mWxJforItself", jacobianW2, mRMin, mRMax, mPMin, mPMax, 3);
@@ -55,7 +56,8 @@ void wignerUtils::init(){
     setFunctionsParameters();
 }
 //_________________________________________________________________________
-void wignerUtils::setFunctionsParameters(){
+void wignerUtils::setFunctionsParameters()
+{
     setThreeParam(mWxJ);
     normalization();
     setThreeParam(mW);
@@ -356,17 +358,20 @@ void wignerUtils::normalization()
     mNorm = norm;
 }
 //_________________________________________________________________________
-void wignerUtils::setParams(float strong, float strongR, float coloumb, float sourceRadius, float spinFact){
+void wignerUtils::setParams(float strong, float strongR, float coloumb, float sourceRadius, float spinFact)
+{
     mV0 = strong;
     mRWidth = strongR;
     mR0 = sourceRadius;
 }
 //_________________________________________________________________________
-void wignerUtils::setSourceRadius(float radius){
+void wignerUtils::setSourceRadius(float radius)
+{
     mR0 = radius;
 }
 //_________________________________________________________________________
-void wignerUtils::setKstar(float kstar, float kt){
+void wignerUtils::setKstar(float kstar, float kt)
+{
     mKStar = kStarEff(kstar, mRadius);
     mWxJ->SetParameter(0, 1.);
     reSetKStar();
@@ -416,7 +421,8 @@ void wignerUtils::reSetNorm()
     mC->SetParameter(0, mNorm);
 }
 //_________________________________________________________________________
-void wignerUtils::reSetMu(){
+void wignerUtils::reSetMu()
+{
     mK->SetParameter(3, mMu);
     mV->SetParameter(3, mMu);
     mH->SetParameter(3, mMu);
@@ -425,7 +431,8 @@ void wignerUtils::reSetMu(){
     mWH->SetParameter(3, mMu);
 }
 //_________________________________________________________________________
-void wignerUtils::reSetRWidth(){
+void wignerUtils::reSetRWidth()
+{
     mK->SetParameter(4, mRWidth);
     mV->SetParameter(4, mRWidth);
     mH->SetParameter(4, mRWidth);
@@ -434,7 +441,8 @@ void wignerUtils::reSetRWidth(){
     mWH->SetParameter(4, mRWidth);
 }
 //_________________________________________________________________________
-void wignerUtils::reSetV0(){
+void wignerUtils::reSetV0()
+{
     mK->SetParameter(5, mV0);
     mV->SetParameter(5, mV0);
     mH->SetParameter(5, mV0);
@@ -458,23 +466,28 @@ void wignerUtils::reSetRadius()
     mC->SetParameter(1, mRadius);
 }
 //_________________________________________________________________________
-float wignerUtils::kineticSource(){
+float wignerUtils::kineticSource()
+{
     return integral(mWK);
 }
 //_________________________________________________________________________
-float wignerUtils::potentialSource(){
+float wignerUtils::potentialSource()
+{
     return integral(mWV);
 }
 //_________________________________________________________________________
-TF2* wignerUtils::getWignerFunction(){
+TF2 *wignerUtils::getWignerFunction()
+{
     return mW;
 }
 //_________________________________________________________________________
-TF2* wignerUtils::getWignerFunctionForItself(){
+TF2 *wignerUtils::getWignerFunctionForItself()
+{
     return mWxW;
 }
 //_________________________________________________________________________
-TF2* wignerUtils::getWignerFunctionForJacobian(){
+TF2 *wignerUtils::getWignerFunctionForJacobian()
+{
     return mWxJ;
 }
 //_________________________________________________________________________
@@ -590,7 +603,7 @@ double wignerUtils::getV0()
 //_________________________________________________________________________
 double wignerUtils::getcoal()
 {
-    return integral(mC)*(getHCut()*2*TMath::Pi())*(getHCut()*2*TMath::Pi())*(getHCut()*2*TMath::Pi());
+    return integral(mC) * (getHCut() * 2 * TMath::Pi()) * (getHCut() * 2 * TMath::Pi()) * (getHCut() * 2 * TMath::Pi());
 }
 //_________________________________________________________________________
 double wignerUtils::getDeuteronInt()
