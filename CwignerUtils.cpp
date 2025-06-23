@@ -1,4 +1,4 @@
-#include "CWignerUtils.h"
+#include "CwignerUtils.h"
 #include "TMath.h"
 #include "TF2.h"
 
@@ -54,6 +54,38 @@ void wignerUtils::init()
     mDInt = new TF2("WDInt", wignerDeuteronIntegral, mRMin, mRMax, mPMin, mPMax, 0);
     mC = new TF2("CoalescenceProb", coalescenceProbability, mRMin, mRMax, mPMin, mPMax, 3);
     setFunctionsParameters();
+}
+//_________________________________________________________________________
+float wignerUtils::calcProb()
+{
+  return getcoal();
+}
+//_________________________________________________________________________
+void wignerUtils::setCharges(float cS, float cC)
+{
+}
+//_________________________________________________________________________
+float wignerUtils::kineticDeuteron(){
+
+}
+//_________________________________________________________________________
+float wignerUtils::getKstarFinal(float coalProb, float massRed, float boundE) {
+  float kinetic = kineticSource();
+  float potential = potentialSource();
+  float Efin = TMath::Max(float(0.), (kinetic + potential - boundE * coalProb) / (1 - coalProb));
+  return sqrt(Efin * 2 * massRed);
+}
+//_________________________________________________________________________
+float wignerUtils::getCoalProb(const particleMC& p1, const particleMC& p2) {
+  if (p1.pdg * p2.pdg < 0 || p1.pdg == p2.pdg){
+    return 0;
+  }
+
+  double kstar = utils::getKstar(p1, p2) * 1E3;
+  double kt = utils::getKt(p1, p2);
+
+  setKstar(kstar, kt);
+  return calcProb();
 }
 //_________________________________________________________________________
 void wignerUtils::setFunctionsParameters()
@@ -345,6 +377,7 @@ double wignerUtils::integral(TF2 *function, double minX, double maxX, double min
     {
         for (float p = mDp / 2 + minP; p < maxP; p += mDp)
         {
+printf("%f %f %f\n",x,p,function->Eval(x, p));
             res += function->Eval(x, p);
         }
     }
@@ -370,7 +403,7 @@ void wignerUtils::setSourceRadius(float radius)
     mR0 = radius;
 }
 //_________________________________________________________________________
-void wignerUtils::setKstar(float kstar, float kt)
+void wignerUtils::setKstar(float kstar, float kt, utils::type system)
 {
     mKStar = kStarEff(kstar, mRadius);
     mWxJ->SetParameter(0, 1.);

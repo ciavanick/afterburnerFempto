@@ -1,12 +1,24 @@
-void wavetest(float rsource=-3){
-  utils::type system=utils::pn;
+#include "TF2.h"
+#include "TFile.h"
+#include "TH2.h"
+#include "Cutils.h"
+#include "TGraph.h"
+#include "TCanvas.h"
+#include "CwignerUtils.h"
+#include "CwaveUtils.h"
+
+//using method = wignerUtils;
+using method = waveUtils;
+
+void wavetest2(float rsource=-3){
+  utils::type system=utils::pp;
 
   float radius = 3.2;
   float V0 = 17.4;
   float spinFact = 3./8;
   float bindingE=-2.22;
 
-  waveUtils a;
+  method a;
   a.setParams(V0, radius, 1.44, rsource,spinFact);
   a.init();
 
@@ -59,14 +71,14 @@ void wavetest(float rsource=-3){
   float kstar = 50;
 
   a.setKstar(kstar,1,system);
-  a.getUSource()->Draw();
-  a.getUDeuteron()->Draw("SAME");
+//  a.getUSource()->Draw();
+//  a.getUDeuteron()->Draw("SAME");
 
-  a.getUDeuteron()->SetLineColor(4);
+//  a.getUDeuteron()->SetLineColor(4);
   printf("kin Source = %f vs %f\n",a.kineticSource(),kstar*kstar/938);
   printf("kin deuteron = %f - V deuteron = %f - E = %f\n",a.kineticDeuteron(),a.potentialDeuteron(),a.kineticDeuteron()+a.potentialDeuteron());
   double err;
-  printf("Norm = %f\n",a.getDeuteron2int()->IntegralOneDim(0,20,1E-8,1E-8,err));
+//  printf("Norm = %f\n",a.getDeuteron2int()->IntegralOneDim(0,20,1E-8,1E-8,err));
 
   TH1F *hSE = new TH1F("hSE",";k* (Mev/c);",40,0,400);
   TH1F *hME = new TH1F("hME",";k* (Mev/c);",40,0,400);

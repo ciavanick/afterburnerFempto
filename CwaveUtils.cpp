@@ -142,12 +142,12 @@ void waveUtils::setCharges(float cS, float cC){
   mDeuteronV->SetParameter(6,cC);
 }
 //_________________________________________________________________________
-void waveUtils::setKstar(float kstar, float kt, type system) {
+void waveUtils::setKstar(float kstar, float kt, utils::type system) {
   if(! mIsInitialized){
     init();
   }
   float radiusStrong = mStrongR;
-  if(system==nn || system==pn || system==pp){
+  if(system==utils::nn || system==utils::pn || system==utils::pp){
     mK1 = sqrt(2*MRED_NN*(EBOUND_D+mStrong))/HCUT;
     mK2 = sqrt(-2*MRED_NN*EBOUND_D)/HCUT;
     mDeuteronKin->SetParameter(5,MRED_NN);
@@ -155,7 +155,7 @@ void waveUtils::setKstar(float kstar, float kt, type system) {
     mSourceV->SetParameter(4,radiusStrong); // no need to normalize source
     mSourceV->SetParameter(5,mStrong); // no need to normalize source
     mDeuteronV->SetParameter(8,mStrong);
-  } else if(system==Dn || system==Dp) {
+  } else if(system==utils::Dn || system==utils::Dp) {
     radiusStrong = mStrongRDn;
     mK1 = sqrt(2*MRED_DN*((EBOUND_T - EBOUND_D)+mStrongDn*2))/HCUT;
     mK2 = sqrt(-2*MRED_DN*(EBOUND_T - EBOUND_D))/HCUT;
@@ -164,7 +164,7 @@ void waveUtils::setKstar(float kstar, float kt, type system) {
     mSourceV->SetParameter(4,radiusStrong); // no need to normalize source
     mSourceV->SetParameter(5,mStrongDn); // no need to normalize source
     mDeuteronV->SetParameter(8,mStrongDn);
-  } else if(system==DD) {
+  } else if(system==utils::DD) {
     radiusStrong = mStrongRDD;
     mK1 = sqrt(2*MRED_DD*((EBOUND_HE - 2*EBOUND_D)+mStrongDn*4))/HCUT;
     mK2 = sqrt(-2*MRED_DD*(EBOUND_HE - 2*EBOUND_D))/HCUT;
@@ -173,7 +173,7 @@ void waveUtils::setKstar(float kstar, float kt, type system) {
     mSourceV->SetParameter(4,radiusStrong); // no need to normalize source
     mSourceV->SetParameter(5,mStrongDD); // no need to normalize source
     mDeuteronV->SetParameter(8,mStrongDD);
-  } else if(system==Tn || system==Tp || system==Hen || system==Hep) {
+  } else if(system==utils::Tn || system==utils::Tp || system==utils::Hen || system==utils::Hep) {
     radiusStrong = mStrongRTn;
     mK1 = sqrt(2*MRED_TN*((EBOUND_HE - EBOUND_T)+mStrongDn*3))/HCUT;
     mK2 = sqrt(-2*MRED_TN*(EBOUND_HE - EBOUND_T))/HCUT;
@@ -507,38 +507,38 @@ float waveUtils::getCoalProb(const particleMC& p1, const particleMC& p2) {
     pdgL = pdgM;
     pdgM = dummy;
   }
-  waveUtils::type system=waveUtils::none;
+  utils::type system=utils::none;
   if(pdgM == 2112){ // nn
-    system = waveUtils::nn;
+    system = utils::nn;
   } else if (pdgM == 2212) { // pn or pp
     if(pdgL == 2112){
-      system = waveUtils::pn;
+      system = utils::pn;
     } else {
-      system = waveUtils::pp;
+      system = utils::pp;
     }
   } else if(pdgM == 4324) { // Dn or Dp or DD
     if(pdgL == 2112){
-      system = waveUtils::Dn;
+      system = utils::Dn;
     } else if(pdgL == 2212){
-      system = waveUtils::Dp;
+      system = utils::Dp;
     } else {
-      system = waveUtils::DD;
+      system = utils::DD;
     }
   } else if(pdgM == 6436) { // Tn or Tp
     if(pdgL == 2112){
-      system = waveUtils::Tn;
+      system = utils::Tn;
     } else if(pdgL == 2212){
-      system = waveUtils::Tp;
+      system = utils::Tp;
     }
   } else if(pdgM == 6536) { // 3Hen o 3Hep
     if(pdgL == 2112){
-      system = waveUtils::Hen;
+      system = utils::Hen;
     } else if(pdgL == 2212){
-      system = waveUtils::Hep;
+      system = utils::Hep;
     }
   }
 
-  if(system == waveUtils::none){
+  if(system == utils::none){
     return 0;
   }
 

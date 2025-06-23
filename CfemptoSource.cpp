@@ -3,7 +3,7 @@
 #include "TRandom.h"
 
 void femptoSource::init() {
-  wignerUtils::init();
+  method::init();
   vfempto::init();
 }
 
@@ -15,24 +15,28 @@ bool femptoSource::set(particleMC& p1, particleMC& p2, float chargeColoumb, floa
 
   int pdgM = std::abs(p1.pdg);
   int pdgL = std::abs(p2.pdg);
-  if (pdgM < pdgL) std::swap(pdgM, pdgL);
-
-  waveUtils::type system = waveUtils::none;
-  if (pdgM == 2112) {
-    system = waveUtils::nn;
-  } else if (pdgM == 2212) {
-    system = (pdgL == 2112) ? waveUtils::pn : waveUtils::pp;
-  } else if (pdgM == 4324) {
-    if (pdgL == 2112) system = waveUtils::Dn;
-    else if (pdgL == 2212) system = waveUtils::Dp;
-    else system = waveUtils::DD;
-  } else if (pdgM == 6436) {
-    system = (pdgL == 2112) ? waveUtils::Tn : waveUtils::Tp;
-  } else if (pdgM == 6536) {
-    system = (pdgL == 2112) ? waveUtils::Hen : waveUtils::Hep;
+  if(pdgM < pdgL){
+    int dummy = pdgL;
+    pdgL = pdgM;
+    pdgM = dummy;
   }
 
-  if (system == waveUtils::none) {
+  utils::type system = utils::none;
+  if (pdgM == 2112) {
+    system = utils::nn;
+  } else if (pdgM == 2212) {
+    system = (pdgL == 2112) ? utils::pn : utils::pp;
+  } else if (pdgM == 4324) {
+    if (pdgL == 2112) system = utils::Dn;
+    else if (pdgL == 2212) system = utils::Dp;
+    else system = utils::DD;
+  } else if (pdgM == 6436) {
+    system = (pdgL == 2112) ? utils::Tn : utils::Tp;
+  } else if (pdgM == 6536) {
+    system = (pdgL == 2112) ? utils::Hen : utils::Hep;
+  }
+
+  if (system == utils::none) {
     return false;
   }
 
@@ -40,7 +44,7 @@ bool femptoSource::set(particleMC& p1, particleMC& p2, float chargeColoumb, floa
 
   double kt = utils::getKt(p1, p2);
   double kstar = utils::getKstar(p1, p2) * 1E3; // to MeV
-  setKstar(kstar, kt);
+  setKstar(kstar, kt, system);
 
   return true;
 }
@@ -50,53 +54,57 @@ double femptoSource::doInteract(particleMC& p1, particleMC& p2, float chargeColo
                                  float sumRadii, float* pos, float* posLab) {
   int pdgM = std::abs(p1.pdg);
   int pdgL = std::abs(p2.pdg);
-  if (pdgM < pdgL) std::swap(pdgM, pdgL);
+  if(pdgM < pdgL){
+    int dummy = pdgL;
+    pdgL = pdgM;
+    pdgM = dummy;
+  }
 
   bool coalAllow = false;
-  waveUtils::type system = waveUtils::none;
+  utils::type system = utils::none;
 
   if (pdgM == 2112) {
-    system = waveUtils::nn;
+    system = utils::nn;
   } else if (pdgM == 2212) {
     if (pdgL == 2112) {
-      system = waveUtils::pn;
+      system = utils::pn;
       coalAllow = true;
     } else {
-      system = waveUtils::pp;
+      system = utils::pp;
     }
   } else if (pdgM == 4324) {
     if (pdgL == 2112) {
-      system = waveUtils::Dn;
+      system = utils::Dn;
       coalAllow = true;
     } else if (pdgL == 2212) {
-      system = waveUtils::Dp;
+      system = utils::Dp;
       coalAllow = true;
     } else {
-      system = waveUtils::DD;
+      system = utils::DD;
       coalAllow = true;
     }
   } else if (pdgM == 6436) {
     if (pdgL == 2112) {
-      system = waveUtils::Tn;
+      system = utils::Tn;
     } else if (pdgL == 2212) {
-      system = waveUtils::Tp;
+      system = utils::Tp;
       coalAllow = true;
     }
   } else if (pdgM == 6536) {
     if (pdgL == 2112) {
-      system = waveUtils::Hen;
+      system = utils::Hen;
       coalAllow = true;
     } else if (pdgL == 2212) {
-      system = waveUtils::Hep;
+      system = utils::Hep;
     }
   }
 
-  if (system == waveUtils::none) {
+  if (system == utils::none) {
     return false;
   }
 
   double kt = utils::getKt(p1, p2);
-  setKstar(mThreshold * 1E3, kt);
+  setKstar(mThreshold * 1E3, kt, system);
 
   float coalProbAtTh = 0;
   if (std::abs(chargeStrong) > 0.9 && std::abs(chargeColoumb) < 1E-3) {
@@ -107,7 +115,7 @@ double femptoSource::doInteract(particleMC& p1, particleMC& p2, float chargeColo
   if (scalingAtTh > 1) scalingAtTh = 1;
 
   double kstar = utils::getKstar(p1, p2) * 1E3;
-  setKstar(kstar, kt);
+  setKstar(kstar, kt, system);
 
   TLorentzVector pSum = p1.q + p2.q;
   TVector3 b = pSum.BoostVector();
@@ -143,24 +151,4 @@ double femptoSource::doInteract(particleMC& p1, particleMC& p2, float chargeColo
   p2.q.Boost(b);
 
   return ptEx;
-}
-
-//_________________________________________________________________________
-float femptoSource::getKstarFinal(float coalProb, float massRed, float boundE) const {
-  float kinetic = wignerUtils::kineticSource();
-  float potential = wignerUtils::potentialSource();
-  float Efin = TMath::Max(float(0.), (kinetic + potential - boundE * coalProb) / (1 - coalProb));
-  return sqrt(Efin * 2 * massRed);
-}
-
-//_________________________________________________________________________
-float femptoSource::getCoalProb(const particleMC& p1, const particleMC& p2) {
-  if (p1.pdg * p2.pdg < 0 || p1.pdg == p2.pdg)
-    return 0;
-
-  double kstar = utils::getKstar(p1, p2) * 1E3;
-  double kt = utils::getKt(p1, p2);
-
-  wignerUtils::setKstar(kstar, kt);
-  return calcProb();
 }

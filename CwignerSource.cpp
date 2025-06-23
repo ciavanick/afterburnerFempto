@@ -1,5 +1,5 @@
-#include "CWignerSource.h"
-#include "CWignerUtils.h"
+#include "CwignerSource.h"
+#include "CwignerUtils.h"
 
 void wignerSource::initFunctions()
 {

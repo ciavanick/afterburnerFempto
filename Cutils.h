@@ -58,6 +58,20 @@ public:
 class utils
 {
   public:
+    enum type{
+      nn=0,
+      pn=1,
+      pp=2,
+      Dn=3,
+      Dp=4,
+      DD=5,
+      Tn=6,
+      Tp=7,
+      Hen=8,
+      Hep=9,
+      none=100
+    };
+
     static double getKstar(const particleMC& p1, const particleMC& p2);                         // return kstar
     static double getKstarAsPr(const particleMC& p1, const particleMC& p2);                     // return kstar
     static double getKt(const particleMC& p1, const particleMC& p2);                            // return kT

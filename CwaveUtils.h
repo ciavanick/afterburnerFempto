@@ -7,27 +7,13 @@
 class waveUtils
 {
   public:
-    enum type{
-      nn=0,
-      pn=1,
-      pp=2,
-      Dn=3,
-      Dp=4,
-      DD=5,
-      Tn=6,
-      Tp=7,
-      Hen=8,
-      Hep=9,
-      none=100
-    };
-
     static void init();
     static float getCoalProb(const particleMC& p1, const particleMC& p2);
     static float calcProb();
     static void setParams(float strong=17.4, float strongR=3.2, float coloumb=1.44, float sourceRadius=0, float spinFact=3./8) { mStrong = strong, mStrongR = strongR, mCoulomb = coloumb, mSourceRadius = sourceRadius, mSpinCoalFactor = spinFact; }
 
     static void setSourceRadius(float radius);
-    static void setKstar(float kstar, float kt=1.0, type system=pn);
+    static void setKstar(float kstar, float kt=1.0, utils::type system=utils::pn);
     static void setCharges(float cS, float cC);
 
     static void setNuclearRadius(float radius);
