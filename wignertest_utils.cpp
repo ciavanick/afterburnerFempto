@@ -1,5 +1,6 @@
 void wignertest_utils()
 {
+    wignerUtils::setParams();
     wignerUtils::init();
     wignerUtils::setIntegrationRanges(0., 20, 0., 0.6);
     wignerUtils::setSourceRadius(1.0); // Equivalent to setR0(1.0)
@@ -39,11 +40,12 @@ void wignertest_utils()
 
         xK[np] = i * i * 0.5 / mRed;
         xV[np] = wV;
+        xP[np] = wignerUtils::getcoal();
 
         if (xK[np] > xV[np])
         {
             xE[np] = xK[np] + xV[np];
-            xkf[np] = sqrt(xE[np] * 2 * mRed);
+            xkf[np] = wignerUtils::getKstarFinal(xP[np], mRed); //sqrt(xE[np] * 2 * mRed);
         }
         else
         {
@@ -53,8 +55,6 @@ void wignertest_utils()
 
         if (WW < 0.00001)
             WW = 1;
-
-        xP[np] = wignerUtils::getcoal();
 
         std::cout << "i : " << i << " coal: " << xP[np] << " r0:  " << r0 << " k*: " << k
                   << " Norm: " << norm << " Check: " << WW << " K: " << wK

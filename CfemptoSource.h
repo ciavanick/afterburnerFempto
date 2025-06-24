@@ -9,6 +9,7 @@
 
 using method = waveUtils;
 
+//template <typename method = waveUtils>
 class femptoSource : public vfempto
 {
   public:

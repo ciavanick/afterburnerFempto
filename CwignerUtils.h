@@ -14,7 +14,7 @@ class wignerUtils{
         static void setMu(double mu);
         static void setRWidth(double rWidth);
         static void setV0(double v0);
-  static void setCharges(float cS, float cC);
+        static void setCharges(float cS, float cC);
         static double wignerSource(double *x, double *pm);
         static double wignerSource2(double *x, double *pm);
         static double jacobianFun(double *x, double *pm);
@@ -31,7 +31,7 @@ class wignerUtils{
         static double radius(double k, double r0);
         static double kStarEff(double k, double radius);
         static void setRadiusK(double k);
-  static float calcProb();
+        static float calcProb();
 
         static double integral(TF2 *function, double minX = mRMin, double maxX = mRMax, double minP = mPMin, double maxP = mPMax);
 
@@ -47,11 +47,11 @@ class wignerUtils{
         static void setMaxP(double maxP);
         static void setIntegrationRanges(double minX, double maxX, double minP, double maxP);
 
-        static void setParams(float strong=17.4, float strongR=3.2, float coloumb=1.44, float sourceRadius=0, float spinFact=3./8);
+        static void setParams(float strong=17.4E-3, float strongR=3.2, float coloumb=1.44E-3, float sourceRadius=3.2, float spinFact=3./8);
         static void setSourceRadius(float radius);
         static void setKstar(float kstar, float kt, utils::type system=utils::type::pn);
         static void setRadiusK(float kstar);
-        static float getKstarFinal(float coalProb = 0., float massRed=938./2, float boundE=-2.22);
+        static float getKstarFinal(float coalProb = 0., float massRed=938./2, float boundE=-2.22E-3);
 
         static float kineticSource();
         static float potentialSource();
@@ -121,6 +121,7 @@ class wignerUtils{
         static void setSixParam(TF2 *function);
 
         static double mR0;
+        static float mSpinCoalFactor;
         static double mRadius;
         static double mKStar;
         static double mKin;

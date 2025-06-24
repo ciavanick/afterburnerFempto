@@ -10,6 +10,7 @@ double wignerUtils::mPMax = 0.6;
 double wignerUtils::mDx = 0.01;
 double wignerUtils::mDp = 0.001;
 double wignerUtils::mFactor = sqrt(3. / 8) * mHCut;
+float wignerUtils::mSpinCoalFactor = 1;
 
 TF2 *wignerUtils::mW = nullptr;
 TF2 *wignerUtils::mWxW = nullptr;
@@ -32,10 +33,10 @@ double wignerUtils::mKin = 0.050;
 double wignerUtils::mNorm = 1.;
 double wignerUtils::mMu = 0.938 / 2;
 double wignerUtils::mRWidth = 3.2;  // 2.1
-double wignerUtils::mV0 = -17.4E-3; //-0.0337
+double wignerUtils::mV0 = 17.4E-3; //-0.0337
 double wignerUtils::mBoundE = 2.2;  // MeV
 
-TFile *wignerUtils::mFileDeuteron = new TFile("deuteronFunction/wigner2.root", "READ");
+TFile *wignerUtils::mFileDeuteron = new TFile("$cpath/deuteronFunction/wigner2.root", "READ");
 TH2D *wignerUtils::mDeuteronH = (TH2D *)mFileDeuteron->Get("h");
 //_________________________________________________________________________
 void wignerUtils::init()
@@ -66,9 +67,12 @@ void wignerUtils::setCharges(float cS, float cC)
 }
 //_________________________________________________________________________
 float wignerUtils::kineticDeuteron(){
-
+  return 0;
 }
 //_________________________________________________________________________
+float wignerUtils::potentialDeuteron(){
+  return 0;
+}//_________________________________________________________________________
 float wignerUtils::getKstarFinal(float coalProb, float massRed, float boundE) {
   float kinetic = kineticSource();
   float potential = potentialSource();
@@ -312,8 +316,12 @@ double wignerUtils::radius(double k, double r0)
 //_________________________________________________________________________
 double wignerUtils::kStarEff(double k, double radius)
 {
-    double kstarWave = mFactor / radius;
-    return radius = sqrt(k * k - kstarWave * kstarWave);
+    float radiusWave = mFactor/k;
+    mRadius = sqrt(radiusWave*radiusWave + radius*radius);
+    float kstarWave = mFactor/mRadius;
+    float kstarEff = sqrt(k*k - kstarWave*kstarWave);
+    printf("set -> R0=%f - Radius=%f - k*=%f - k*eff=%f\n",radius,mRadius,k,kstarEff);
+    return kstarEff; //radius = sqrt(k * k - kstarWave * kstarWave);
 }
 //_________________________________________________________________________
 double wignerUtils::getMinX()
@@ -377,7 +385,6 @@ double wignerUtils::integral(TF2 *function, double minX, double maxX, double min
     {
         for (float p = mDp / 2 + minP; p < maxP; p += mDp)
         {
-printf("%f %f %f\n",x,p,function->Eval(x, p));
             res += function->Eval(x, p);
         }
     }
@@ -395,7 +402,8 @@ void wignerUtils::setParams(float strong, float strongR, float coloumb, float so
 {
     mV0 = strong;
     mRWidth = strongR;
-    mR0 = sourceRadius;
+    mR0 = std::abs(sourceRadius);
+    mSpinCoalFactor = spinFact;
 }
 //_________________________________________________________________________
 void wignerUtils::setSourceRadius(float radius)
@@ -405,18 +413,21 @@ void wignerUtils::setSourceRadius(float radius)
 //_________________________________________________________________________
 void wignerUtils::setKstar(float kstar, float kt, utils::type system)
 {
-    mKStar = kStarEff(kstar, mRadius);
+    setRadiusK(double(kstar));
+/*
+    mKStar = kStarEff(kstar, mR0);
     mWxJ->SetParameter(0, 1.);
     reSetKStar();
     normalization();
     reSetNorm();
+*/
 }
 //_________________________________________________________________________
 void wignerUtils::setRadiusK(double k)
 {
     mKin = k;
-    mRadius = wignerUtils::radius(k, mR0);
-    mKStar = wignerUtils::kStarEff(k, mRadius);
+//    mRadius = wignerUtils::radius(k, mR0);
+    mKStar = wignerUtils::kStarEff(k, mR0);
     mWxJ->SetParameter(0, 1.);
     reSetRadius();
     reSetKStar();
@@ -506,7 +517,7 @@ float wignerUtils::kineticSource()
 //_________________________________________________________________________
 float wignerUtils::potentialSource()
 {
-    return integral(mWV);
+    return -integral(mWV);
 }
 //_________________________________________________________________________
 TF2 *wignerUtils::getWignerFunction()
@@ -636,7 +647,9 @@ double wignerUtils::getV0()
 //_________________________________________________________________________
 double wignerUtils::getcoal()
 {
-    return integral(mC) * (getHCut() * 2 * TMath::Pi()) * (getHCut() * 2 * TMath::Pi()) * (getHCut() * 2 * TMath::Pi());
+    printf("R=%f - k*=%f\n",mKStar,mRadius);
+
+    return integral(mC) * (getHCut() * 2 * TMath::Pi()) * (getHCut() * 2 * TMath::Pi()) * (getHCut() * 2 * TMath::Pi()) * mSpinCoalFactor;
 }
 //_________________________________________________________________________
 double wignerUtils::getDeuteronInt()

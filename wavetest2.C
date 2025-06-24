@@ -7,11 +7,11 @@
 #include "CwignerUtils.h"
 #include "CwaveUtils.h"
 
-//using method = wignerUtils;
-using method = waveUtils;
+using method = wignerUtils;
+//using method = waveUtils;
 
-void wavetest2(float rsource=-3){
-  utils::type system=utils::pp;
+void wavetest2(float rsource=-1){
+  utils::type system=utils::pn;
 
   float radius = 3.2;
   float V0 = 17.4;
@@ -19,7 +19,12 @@ void wavetest2(float rsource=-3){
   float bindingE=-2.22;
 
   method a;
-  a.setParams(V0, radius, 1.44, rsource,spinFact);
+  float convToGeV = 1;
+  if constexpr (std::is_same_v<method, wignerUtils>) {
+  convToGeV = 1E-3;
+  }
+  a.setParams(V0*convToGeV, radius, 1.44*convToGeV, rsource,spinFact);
+
   a.init();
 
   float mred = 938/2.;
@@ -90,15 +95,18 @@ void wavetest2(float rsource=-3){
   int np=0;
   float x[1000],y[1000],z[1000],t[1000],s[1000],k[1000];
   float coalInt = 0;
-  for(kstar = 1; kstar < 1000; kstar+=1){
+  for(kstar = 1; kstar < 500; kstar+=1){
+    printf("%f\n",kstar);
     x[np] = kstar;
-    a.setKstar(kstar,1,system);
+    a.setKstar(kstar*convToGeV,1,system);
+
     s[np] = a.calcProb() * coal;
+    printf("coal P = %f\n",s[np]);
     coalInt += s[np]*kstar*kstar;
-    y[np] = (a.kineticSource()/mred*(938/2.) + a.potentialSource() - bindingE*s[np])/(1-s[np]);
+    y[np] = (a.kineticSource()/mred*(938/2.) + a.potentialSource() - bindingE*convToGeV*s[np])/(1-s[np]);
     k[np] = a.kineticSource()/mred*(938/2.);
     z[np] = kstar*kstar/2/mred;
-    t[np] = a.getKstarFinal(s[np], mred, bindingE);
+    t[np] = a.getKstarFinal(s[np], mred*convToGeV, bindingE*convToGeV)/convToGeV;
     for(int jj=0; jj < 100; jj++){
       hSE->Fill(t[np],kstar*kstar);
       hME->Fill(x[np],kstar*kstar);

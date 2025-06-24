@@ -1,4 +1,4 @@
-void wavetest(float rsource=-3){
+void wavetest(float rsource=-2){
   utils::type system=utils::pn;
 
   float radius = 3.2;
