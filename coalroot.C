@@ -6,7 +6,7 @@
 int main(int argc, char **argv){
   TRint *theApp = new TRint("coalroot", &argc, argv);
 
-  theApp->Run();  
+  theApp->Run();
 
   return 0;
 }

@@ -211,9 +211,9 @@ double wignerSource::getDeuteronInt()
 }
 //_________________________________________________________________________
 double wignerSource::doInteract(particleMC& p1, particleMC& p2){
-    
+    return 0.;
 }
 //_________________________________________________________________________
 float wignerSource::getCoalProb(const particleMC& p1, const particleMC& p2){
-
+    return 0.;
 }
