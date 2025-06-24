@@ -4,8 +4,9 @@ bool readerFE::LoadEvent(int iev) {
   if(vreader::LoadEvent(iev)){
     return 1;
   }
-
   int ntrack = mArr->GetEntriesFast();
+
+  mParticles.clear();
 
   for(int i=0; i < ntrack; i++){
     TParticle *p = (TParticle*) mArr->At(i);

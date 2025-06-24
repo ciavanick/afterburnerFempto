@@ -133,7 +133,6 @@ void particleMC::print() const {
 //_________________________________________________________________________
 void particleCand::addOption(double px, double py, double pz, int pdg){
   double mass = utils::getMass(pdg);
-
   double energy = sqrt(px*px + py*py + pz*pz + mass*mass);
   pdgOptions.push_back(pdg);
   q.emplace_back(px,py,pz,energy);

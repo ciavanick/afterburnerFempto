@@ -35,15 +35,17 @@ class femptoSource : public vfempto
     virtual void init();
 
     void setSourceRadius(float radius) { method::setSourceRadius(radius); }
-    void setKstar(float kstar, float kt=1.0, utils::type system=utils::nn) { method::setKstar(kstar, kt, system); }
-
-    void setCharges(float cS, float cC) {
+    void setKstar(float kstar, float kt=1.0, utils::type system=utils::nn) {
       if constexpr (std::is_same_v<method, waveUtils>) {
-        method::setCharges(cS, cC);
+        method::setKstar(kstar, kt, system);
       }
       if constexpr (std::is_same_v<method, wignerUtils>) {
-        method::setParams(cS, 3.2, cC, wignerUtils::getRadius()); // 3.2 = strongR default
+        method::setKstar(kstar*1E-3, kt, system); 
       }
+    }
+
+    void setCharges(float cS, float cC) {
+      method::setCharges(cS, cC);
     }
 
     float kineticSource() const { return method::kineticSource(); }

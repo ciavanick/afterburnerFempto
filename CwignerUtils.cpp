@@ -320,7 +320,6 @@ double wignerUtils::kStarEff(double k, double radius)
     mRadius = sqrt(radiusWave*radiusWave + radius*radius);
     float kstarWave = mFactor/mRadius;
     float kstarEff = sqrt(k*k - kstarWave*kstarWave);
-    printf("set -> R0=%f - Radius=%f - k*=%f - k*eff=%f\n",radius,mRadius,k,kstarEff);
     return kstarEff; //radius = sqrt(k * k - kstarWave * kstarWave);
 }
 //_________________________________________________________________________
@@ -408,7 +407,7 @@ void wignerUtils::setParams(float strong, float strongR, float coloumb, float so
 //_________________________________________________________________________
 void wignerUtils::setSourceRadius(float radius)
 {
-    mR0 = radius;
+//    mR0 = std::abs(radius);
 }
 //_________________________________________________________________________
 void wignerUtils::setKstar(float kstar, float kt, utils::type system)
@@ -647,7 +646,7 @@ double wignerUtils::getV0()
 //_________________________________________________________________________
 double wignerUtils::getcoal()
 {
-    printf("R=%f - k*=%f\n",mKStar,mRadius);
+//    printf("R=%f - k*=%f\n",mKStar,mRadius);
 
     return integral(mC) * (getHCut() * 2 * TMath::Pi()) * (getHCut() * 2 * TMath::Pi()) * (getHCut() * 2 * TMath::Pi()) * mSpinCoalFactor;
 }

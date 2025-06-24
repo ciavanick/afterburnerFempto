@@ -14,9 +14,17 @@ int pdg2 = pdgPr;
 
 vreader *reader;
 
+bool isWigner = false;
+
+float thresholdkstar = 0.4;
+
+float sourceSize = 1;
+
+float spinFactor = 3./8;
+
 void test(bool interact=true){
   if(fromFile){
-    reader = new readerMC();
+    reader = new readerFE();
     reader->openFile("listaMC",true); // true to read a collection
   }
 
@@ -33,12 +41,19 @@ void test(bool interact=true){
 
   float sumRadii = 0;
 
-  float sourceSize = 0;
+  vfempto *interactor;
 
-//  vfempto *interactor= new vfempto;   // simple model box potential
-  vfempto *interactor= new femptoSource;      // Lenard-Jones  strong potential
-  interactor->setParams(33.7, 2.1, 1.44, -2);
-//  interactor->setParams(2.2E-3, 2.4, 1.44E-3, sourceSize);
+  if(! isWigner){
+    interactor = new femptoSource;      // Lenard-Jones  strong potential
+    interactor->setParams(17.4, 3.2, 1.44, -2*sourceSize, spinFactor);
+  } else {
+    interactor = new femptoSource<wignerUtils>;      // Lenard-Jones  strong potential
+    interactor->setParams(17.4E-3, 3.2, 1.44E-3, sourceSize, spinFactor);
+  }
+
+//  interactor->setNmaxSteps(1);
+
+  interactor->setThreshold(thresholdkstar);
 
   TH1D *h = new TH1D("h",";k* (GeV/c)",nbins,0,0.2);
   TH1D *h2 = new TH1D("h2",";k* (GeV/c)",nbins,0,0.2);
@@ -88,7 +103,7 @@ void test(bool interact=true){
 
   printf("start running events \n");
   for(int i=0; i < nev-nmix; i++){
-    if(! (i%100000)) printf("%d/%d\n",i,nev);
+    if(! (i%1000)) printf("%d/%d\n",i,nev);
     int lev = i % nmix;
     std::vector<particleMC>& event = fromFile ? readEvent() : doToyEvent();
 
