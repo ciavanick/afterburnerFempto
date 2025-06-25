@@ -55,6 +55,7 @@ void wignerUtils::init()
     mDInt = new TF2("WDInt", wignerDeuteronIntegral, mRMin, mRMax, mPMin, mPMax, 0);
     mC = new TF2("CoalescenceProb", coalescenceProbability, mRMin, mRMax, mPMin, mPMax, 3);
     setFunctionsParameters();
+    setIntegrationRanges(0., 20, 0., 0.6);
 }
 //_________________________________________________________________________
 float wignerUtils::calcProb()
@@ -85,8 +86,56 @@ float wignerUtils::getCoalProb(const particleMC& p1, const particleMC& p2) {
     return 0;
   }
 
-  double kstar = utils::getKstar(p1, p2) * 1E3;
+  if(p1.pdg == p2.pdg){ // identical particle cannot do coalescence
+    return 0;
+  }
+
+  double kstar = utils::getKstar(p1, p2);
   double kt = utils::getKt(p1, p2);
+
+  int pdgM = std::abs(p1.pdg);
+  int pdgL = std::abs(p2.pdg);
+
+  if(pdgM < pdgL){
+    int dummy = pdgL;
+    pdgL = pdgM;
+    pdgM = dummy;
+  }
+  utils::type system=utils::none;
+
+  if(pdgM == 2112){ // nn
+    system = utils::nn;
+  } else if (pdgM == 2212) { // pn or pp
+    if(pdgL == 2112){
+      system = utils::pn;
+    } else {
+      system = utils::pp;
+    }
+  } else if(pdgM == 4324) { // Dn or Dp or DD
+    if(pdgL == 2112){
+      system = utils::Dn;
+    } else if(pdgL == 2212){
+      system = utils::Dp;
+    } else {
+      system = utils::DD;
+    }
+  } else if(pdgM == 6436) { // Tn or Tp
+    if(pdgL == 2112){
+      system = utils::Tn;
+    } else if(pdgL == 2212){
+      system = utils::Tp;
+    }
+  } else if(pdgM == 6536) { // 3Hen o 3Hep
+    if(pdgL == 2112){
+      system = utils::Hen;
+    } else if(pdgL == 2212){
+      system = utils::Hep;
+    }
+  }
+
+  if(system == utils::none){
+    return 0;
+  }
 
   setKstar(kstar, kt);
   return calcProb();

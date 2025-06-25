@@ -4,7 +4,7 @@ bool sel1(const particleMC& p);
 bool sel2(const particleMC& p);
 
 float meson_downscale = 0.1;
-bool fromFile = true;
+bool fromFile = false;
 
 int pdgPr = 2212; // proton
 int pdgDe = 4324; // deuteron
@@ -31,7 +31,7 @@ void test(bool interact=true){
   bool samePart = (pdg1 == pdg2);
 
   const int nbins = 20;
-  const int nev = fromFile ? reader->getNevents() : 1E6;
+  const int nev = fromFile ? reader->getNevents() : 1E5;
   const int nmix = 5;
 
   int chargeComb = 1; // 1=same charge, -1=opposite charge
