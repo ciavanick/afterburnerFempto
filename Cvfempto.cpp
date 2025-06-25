@@ -204,7 +204,7 @@ void vfempto::doInteractAllStep(int step, std::vector<particleMC>& part, bool do
         }
       }
       int A = npro + nneu + ndeu*2 + ntri*3 + nhe*3;
-      if(A == 2 && npro == 1){ // detueron
+      if(1){//A == 2 && npro == 1){ // detueron
         particleMC& p1 = part[mergeable[0]];
         particleMC& p2 = part[mergeable[1]];
         particleMC merged = merge(p1,p2);
