@@ -5,12 +5,13 @@ int pdgAntiPr = -2212; // antiproton
 int pdgAntiNe = -2112; // antineutron
 int pdgAntiDe = -4324; // antideuteron
 
-bool isWigner = true;
+bool isWigner = false;
 
 void runAll(TString listname,  TString outfolder, TString outname)
 {
   // set file reader
   vreader *reader = new readerFE();
+  reader->setEtaRange(-100.,100);
   reader->openFile(listname, true); // true to read a collection
   int nev = reader->getNevents();
   printf("N events found = %d\n", nev);
