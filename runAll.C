@@ -64,6 +64,7 @@ void runAll(TString listname,  TString outfolder, TString outname)
   runDeAntiPr->init();                  // init analysis
 
   runSpectrum *spectra = new runSpectrum(); //spectrum analysis
+  spectra->setRapidityRange(-0.5,0.5);
   spectra->init();
 
 
@@ -77,7 +78,7 @@ void runAll(TString listname,  TString outfolder, TString outname)
    interactor = new femptoSource<wignerUtils>;      // Lenard-Jones trong potential
    interactor->setParams(17.4E-3, 3.2, 1.44E-3, 1.5, 3./8);
   }
-  interactor->setThreshold(0.2);
+  interactor->setThreshold(0.4);
 
 
 

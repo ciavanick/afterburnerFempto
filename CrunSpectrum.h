@@ -9,6 +9,7 @@ class runSpectrum : public vrun
 {
     public:
       runSpectrum(int nmix=10, TString dirName = "runSpectrum") : vrun(nmix, dirName){}
+      void setRapidityRange(float minRapidity, float maxRapidity) {mMinRapidity = minRapidity, mMaxRapidity = maxRapidity;}
     private:
       TH1D *mHProtonSpectrum = nullptr;
       TH1D *mHNeutronSpectrum = nullptr;
@@ -56,6 +57,9 @@ class runSpectrum : public vrun
       int mPDGAntiT = -2212 - 2*2112;
       int mPDGAntiHe3 = -2*2212 - 2112;
       int mPDGAntiHe4 = -2*2212 - 2*2112;
+
+      float mMinRapidity = -0.5;
+      float mMaxRapidity = 0.5;
 
 };
 

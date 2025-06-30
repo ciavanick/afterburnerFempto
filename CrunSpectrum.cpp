@@ -58,7 +58,7 @@ void runSpectrum::process()
         int ipdg = selectP(p);
         if (ipdg == -1)
                 continue;
-        if (std::abs(p.q[ipdg].Rapidity()) < 0.5)
+        if (p.q[ipdg].Rapidity() <= mMinRapidity && p.q[ipdg].Rapidity() >= mMaxRapidity)
         {
             mEvents->Fill("Selected Particles", 1);
             if (p.pdgOptions[ipdg] == mPDGPr)
