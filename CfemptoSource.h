@@ -32,6 +32,8 @@ class femptoSource : public vfempto
 
     bool set(particleMC& p1, particleMC& p2, float chargeColoumb, float chargeStrong);
 
+    void setIsRadiusMtDependent(bool val) { method::setIsRadiusMtDependent(val); }
+
     virtual void init();
 
     void setSourceRadius(float radius) { method::setSourceRadius(radius); }

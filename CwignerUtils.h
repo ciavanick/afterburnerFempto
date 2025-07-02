@@ -32,6 +32,7 @@ class wignerUtils{
         static double kStarEff(double k, double radius);
         static void setRadiusK(double k);
         static float calcProb();
+        static void setIsRadiusMtDependent(bool val=true) {}
 
         static double integral(TF2 *function, double minX = mRMin, double maxX = mRMax, double minP = mPMin, double maxP = mPMax);
 

@@ -18,6 +18,9 @@ class waveUtils
 
     static void setNuclearRadius(float radius);
 
+    static void setIsRadiusMtDependent(bool val=true) { mIsRadiusMtDependent=val; }
+    static bool isRadiusMtDependent() { return mIsRadiusMtDependent; }
+
     static TF1 *getCoalRe() { return mCoalescenceRe; }
     static TF1 *getCoalIm() { return mCoalescenceIm; }
 
@@ -104,7 +107,7 @@ class waveUtils
     static double mK1;        // sqrt(2*MRED*(EBOUND+V0))/HCUT;
     static double mK2;        // sqrt(-2*MRED*EBOUND)/HCUT;
     static double mNormRight; // sin(k1*mStrongR) * TMath::Exp(k2*mStrongR);
-
+    static bool mIsRadiusMtDependent;
 };
 
 #endif

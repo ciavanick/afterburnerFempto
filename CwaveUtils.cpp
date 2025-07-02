@@ -18,6 +18,7 @@ float waveUtils::mStrongRDn = 3.2;
 float waveUtils::mStrongRDD = 3.2;
 float waveUtils::mStrongRTn = 3.2;
 float waveUtils::mStrongRHen = 3.2;
+bool waveUtils::mIsRadiusMtDependent=false;
 
 TF1 *waveUtils::mDeuteron = nullptr;
 TF1 *waveUtils::mUDeuteron = nullptr;
@@ -188,6 +189,12 @@ void waveUtils::setKstar(float kstar, float kt, utils::type system) {
 
   if(mSourceRadius < 0){
     float radiusSource = std::abs(mSourceRadius);///kt);
+
+    if(mIsRadiusMtDependent){ //
+      const float mtRef = 1; // radius is given at mT=1 GeV/c^2 for protons
+      float mt = sqrt(kt*kt + 0.938*0.938);
+      radiusSource *= TMath::Power(mtRef/mt,0.6);
+    }
     static const float factor = sqrt(3*0.5) * HCUT;
     float radiusWave = factor/kstar;
     float radius = sqrt(radiusWave*radiusWave + radiusSource*radiusSource);
