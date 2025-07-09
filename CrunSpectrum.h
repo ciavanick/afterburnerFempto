@@ -9,6 +9,7 @@ class runSpectrum : public vrun
 {
     public:
       runSpectrum(int nmix=10, TString dirName = "runSpectrum") : vrun(nmix, dirName){}
+      void setRapidityRange(float minRapidity, float maxRapidity) {mMinRapidity = minRapidity, mMaxRapidity = maxRapidity;}
     private:
       TH1D *mHProtonSpectrum = nullptr;
       TH1D *mHNeutronSpectrum = nullptr;
@@ -36,6 +37,34 @@ class runSpectrum : public vrun
       TH1D *mHAntiHelium3SpectrumA = nullptr;
       TH1D *mHAntiHelium4SpectrumA = nullptr;
 
+      TH2D *mHProtonPEta = nullptr;
+      TH2D *mHNeutronPEta = nullptr;
+      TH2D *mHDeuteronPEta = nullptr;
+      TH2D *mHTritiumPEta = nullptr;
+      TH2D *mHHelium3PEta = nullptr;
+      TH2D *mHHelium4PEta = nullptr;
+
+      TH2D *mHAntiProtonPEta = nullptr;
+      TH2D *mHAntiNeutronPEta = nullptr;
+      TH2D *mHAntiDeuteronPEta = nullptr;
+      TH2D *mHAntiTritiumPEta = nullptr;
+      TH2D *mHAntiHelium3PEta = nullptr;
+      TH2D *mHAntiHelium4PEta = nullptr;
+
+      TH2D *mHProtonPtEta = nullptr;
+      TH2D *mHNeutronPtEta = nullptr;
+      TH2D *mHDeuteronPtEta = nullptr;
+      TH2D *mHTritiumPtEta = nullptr;
+      TH2D *mHHelium3PtEta = nullptr;
+      TH2D *mHHelium4PtEta = nullptr;
+
+      TH2D *mHAntiProtonPtEta = nullptr;
+      TH2D *mHAntiNeutronPtEta = nullptr;
+      TH2D *mHAntiDeuteronPtEta = nullptr;
+      TH2D *mHAntiTritiumPtEta = nullptr;
+      TH2D *mHAntiHelium3PtEta = nullptr;
+      TH2D *mHAntiHelium4PtEta = nullptr;
+
       void initHistos() override;
       void initEventsHisto() override;
       void process() override;
@@ -56,6 +85,9 @@ class runSpectrum : public vrun
       int mPDGAntiT = -2212 - 2*2112;
       int mPDGAntiHe3 = -2*2212 - 2112;
       int mPDGAntiHe4 = -2*2212 - 2*2112;
+
+      float mMinRapidity = -0.5;
+      float mMaxRapidity = 0.5;
 
 };
 
