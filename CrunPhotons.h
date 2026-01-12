@@ -12,6 +12,10 @@ public:
 
 private:
     TH1D *mHPhotonsE = nullptr;
+    TH1D *mHPhotonsDeuteronsKStar = nullptr;
+    
+    
+    TH2D *mHPhotonsDeuteronsEP = nullptr;
 
     void initHistos() override;
     void initEventsHisto() override;
@@ -19,6 +23,7 @@ private:
     void writeHistos() override;
 
     int mPDGPhotons = 22;
+    int mPDGDeuterons = 4324;
 
     float mMinRapidity = -0.5;
     float mMaxRapidity = 0.5;
