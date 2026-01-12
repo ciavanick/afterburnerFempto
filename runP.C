@@ -22,7 +22,7 @@ void runP(TString listname, TString outfolder, TString outname, double R_D = 3.2
   int nmixedEvents = 10;
 
   runPhotons *photons = new runPhotons(); //spectrum analysis
-  //photons->setRapidityRange(-100.,100);
+  photons->setRapidityRange(-100.,100);
   photons->init();
 
   //waveUtils::setParams(10, R);
