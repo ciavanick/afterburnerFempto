@@ -23,6 +23,9 @@ private:
     void process() override;
     void writeHistos() override;
 
+    int selectPhotons(const particleCand &p);
+    int selectDeuterons(const particleCand &p);
+
     int mPDGPhotons = 22;
     int mPDGDeuterons = 4324;
 

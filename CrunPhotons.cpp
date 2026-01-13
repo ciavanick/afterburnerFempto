@@ -4,36 +4,43 @@
 
 void runPhotons::initHistos()
 {
-    mHPhotonsE = new TH1D("mHPhotonsE" + mName, "N;E (GeV)", 200, 0., 10.);
-    mHPhotonsP = new TH1D("mHPhotonsE" + mName, "N;P (GeV/c)", 200, 0., 10.);
-    mHPhotonsDeuteronsKStar = new TH1D("mHPhotonsDeuteronsKStar" + mName, "N;k* (GeV/c)", 200, 0., 10.);
-    mHPhotonsDeuteronsEP = new TH2D("mHPhotonsDeuteronsEP" + mName, "N;E (GeV); p (GeV/c)", 200, 0., 10., 200, 0., 10.);
+    mHPhotonsE = new TH1D("mHPhotonsE" + mName, "N;E (GeV)", 1000, 0., 10.);
+    mHPhotonsP = new TH1D("mHPhotonsP" + mName, "N;P (GeV/c)", 1000, 0., 10.);
+    mHPhotonsDeuteronsKStar = new TH1D("mHPhotonsDeuteronsKStar" + mName, "N;k* (GeV/c)", 1000, 0., 10.);
+    mHPhotonsDeuteronsEP = new TH2D("mHPhotonsDeuteronsEP" + mName, "N;E (GeV); p (GeV/c)", 1000, 0., 10., 1000, 0., 10.);
 }
 
 void runPhotons::initEventsHisto()
 {
-    mEvents = new TH1D("mEvents" + mName, "Number of events", 5, 0, 5);
+    mEvents = new TH1D("mEvents" + mName, "Number of events", 6, 0, 6);
     mEvents->Fill("Number of unweighted Events", 0);
     mEvents->Fill("Number of Events", 0);
     mEvents->Fill("Number of accepted Events", 0);
+    mEvents->Fill("Selected Particles", 0);
     mEvents->Fill("Number of Photons", 0);
-    mEvents->Fill("Number of Photons per Deuteron", 0);
+    mEvents->Fill("Number of Deuteron per Photons", 0);
+    mEvents->Fill("Number of Deuteron", 0);
 }
 
 void runPhotons::process()
 {
+    //----------------------------------------- this part has to vanish
+    for (int i = 0; i < mVect.size(); ++i)
+    {
+        const particleCand &p = mVect[i];
+        int ipdgDeuterons = selectDeuterons(p);
+        if (ipdgDeuterons == -1)
+            continue;
+        float y = p.q[ipdgDeuterons].Rapidity();
+        if (y >= mMinRapidity && y <= mMaxRapidity){
+            mEvents->Fill("Number of Deuteron", 1);
+        }  
+    }
+    //------------------------------------------------- 
     for (int i1 = 0; i1 < mVect.size(); ++i1)
     {
         const particleCand &p1 = mVect[i1];
-        int ipdgPhotons = -1;
-        for (int j = 0; j < p1.pdgOptions.size(); ++j)
-        {
-            if (p1.pdgOptions[i1] == mPDGPhotons)
-            {
-                ipdgPhotons = j;
-                break;
-            }
-        }
+        int ipdgPhotons = selectPhotons(p1);
         if (ipdgPhotons == -1)
             continue;
 
@@ -53,21 +60,14 @@ void runPhotons::process()
                     continue;
                 }
 
-                int ipdgDeuterons = -1;
-                for (int j = 0; j < p2.pdgOptions.size(); ++j)
-                {
-                    if (p2.pdgOptions[i2] == mPDGDeuterons)
-                    {
-                        ipdgDeuterons = j;
-                        break;
-                    }
-                }
+                int ipdgDeuterons = selectDeuterons(p2);
                 if (ipdgDeuterons == -1)
                     continue;
 
                 mHPhotonsDeuteronsEP->Fill(p1.q[ipdgPhotons].E(), p2.q[ipdgDeuterons].P());
-                auto kStar = utils::getKstar(p1, p2, mPDGPhotons, mPDGDeuterons);
+                auto kStar = utils::getKstar(p1, p2, ipdgPhotons, ipdgDeuterons);
                 mHPhotonsDeuteronsKStar->Fill(kStar);
+                mEvents->Fill("Number of Deuteron per Photons", 1);
             }
         }
     }
@@ -79,4 +79,32 @@ void runPhotons::writeHistos()
     mHPhotonsP->Write();
     mHPhotonsDeuteronsKStar->Write();
     mHPhotonsDeuteronsEP->Write();
+}
+
+int runPhotons::selectPhotons(const particleCand &p)
+{
+    int ipdgPhotons = -1;
+    for (int j = 0; j < p.pdgOptions.size(); ++j)
+    {
+        if (p.pdgOptions[j] == mPDGPhotons)
+        {
+            ipdgPhotons = j;
+            break;
+        }
+    }
+    return ipdgPhotons;
+}
+
+int runPhotons::selectDeuterons(const particleCand &p)
+{
+    int ipdgDeuterons = -1;
+    for (int j = 0; j < p.pdgOptions.size(); ++j)
+    {
+        if (p.pdgOptions[j] == mPDGDeuterons)
+        {
+            ipdgDeuterons = j;
+            break;
+        }
+    }
+    return ipdgDeuterons;
 }
