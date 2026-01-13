@@ -14,8 +14,8 @@ private:
     TH1D *mHPhotonsE = nullptr;
     TH1D *mHPhotonsP = nullptr;
     TH1D *mHPhotonsDeuteronsKStar = nullptr;
-    
-    
+    TH1D *mHProtonNeutronkstar = nullptr;
+
     TH2D *mHPhotonsDeuteronsEP = nullptr;
 
     void initHistos() override;
@@ -31,6 +31,9 @@ private:
 
     float mMinRapidity = -0.5;
     float mMaxRapidity = 0.5;
+
+    float mProtonMass = 0.938272088;
+    float mNeutronMass = 0.939565420;
 };
 
 #endif
