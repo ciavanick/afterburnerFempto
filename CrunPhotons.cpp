@@ -86,6 +86,7 @@ void runPhotons::writeHistos()
     mHPhotonsP->Write();
     mHPhotonsDeuteronsKStar->Write();
     mHPhotonsDeuteronsEP->Write();
+    mHProtonNeutronkstar->Write();
 }
 
 int runPhotons::selectPhotons(const particleCand &p)
