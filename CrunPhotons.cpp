@@ -4,10 +4,11 @@
 
 void runPhotons::initHistos()
 {
-    mHPhotonsE = new TH1D("mHPhotonsE" + mName, "N;E (GeV)", 1000, 0., 10.);
-    mHPhotonsP = new TH1D("mHPhotonsP" + mName, "N;P (GeV/c)", 1000, 0., 10.);
-    mHPhotonsDeuteronsKStar = new TH1D("mHPhotonsDeuteronsKStar" + mName, "N;k* (GeV/c)", 1000, 0., 10.);
-    mHPhotonsDeuteronsEP = new TH2D("mHPhotonsDeuteronsEP" + mName, "N;E (GeV); p (GeV/c)", 1000, 0., 10., 1000, 0., 10.);
+    mHPhotonsE = new TH1D("mHPhotonsE" + mName, "N;E(#gamma) [GeV]", 2000, 0., 10.);
+    mHPhotonsP = new TH1D("mHPhotonsP" + mName, "N;P(#gamma) [GeV/c]", 2000, 0., 10.);
+    mHPhotonsDeuteronsKStar = new TH1D("mHPhotonsDeuteronsKStar" + mName, "N;k* (#gamma-d)  [GeV/c]", 2000, 0., 10.);
+    mHProtonNeutronkstar = new TH1D("mHProtonNeutronkstar" + mName, "N;k* (p-n) [GeV/c]", 2000, 0., 10.);
+    mHPhotonsDeuteronsEP = new TH2D("mHPhotonsDeuteronsEP" + mName, "N;E (#gamma) [GeV]; p (d) [GeV/c]", 1000, 0., 10., 1000, 0., 10.);
 }
 
 void runPhotons::initEventsHisto()
@@ -32,11 +33,12 @@ void runPhotons::process()
         if (ipdgDeuterons == -1)
             continue;
         float y = p.q[ipdgDeuterons].Rapidity();
-        if (y >= mMinRapidity && y <= mMaxRapidity){
+        if (y >= mMinRapidity && y <= mMaxRapidity)
+        {
             mEvents->Fill("Number of Deuteron", 1);
-        }  
+        }
     }
-    //------------------------------------------------- 
+    //-------------------------------------------------
     for (int i1 = 0; i1 < mVect.size(); ++i1)
     {
         const particleCand &p1 = mVect[i1];
@@ -68,6 +70,11 @@ void runPhotons::process()
                 auto kStar = utils::getKstar(p1, p2, ipdgPhotons, ipdgDeuterons);
                 mHPhotonsDeuteronsKStar->Fill(kStar);
                 mEvents->Fill("Number of Deuteron per Photons", 1);
+                TLorentzVector sum = p2.q[ipdgDeuterons] + p1.q[ipdgPhotons];
+                float DeltaE = sum.M() - mProtonMass - mNeutronMass;
+                float E2 = sum.M() * sum.M();
+                float kstarPN = 0.5 / sum.M() * sqrt(E2 * E2 + (mNeutronMass * mNeutronMass - mProtonMass * mProtonMass) * (mNeutronMass * mNeutronMass - mProtonMass * mProtonMass) - 2 * (mNeutronMass * mNeutronMass + mProtonMass * mProtonMass) * E2);
+                mHProtonNeutronkstar->Fill(kstarPN, 1. / kstarPN / kstarPN);
             }
         }
     }
