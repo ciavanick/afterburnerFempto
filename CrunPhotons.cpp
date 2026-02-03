@@ -7,13 +7,13 @@ void runPhotons::initHistos()
     mHPhotonsE = new TH1D("mHPhotonsE" + mName, "N;E(#gamma) [GeV]", 2000, 0., 10.);
     mHPhotonsP = new TH1D("mHPhotonsP" + mName, "N;P(#gamma) [GeV/c]", 2000, 0., 10.);
     mHPhotonsDeuteronsKStar = new TH1D("mHPhotonsDeuteronsKStar" + mName, "N;k* (#gamma-d)  [GeV/c]", 2000, 0., 10.);
-    mHProtonNeutronkstar = new TH1D("mHProtonNeutronkstar" + mName, "N;k* (p-n) [GeV/c]", 2000, 0., 10.);
+    mHProtonNeutronKStar = new TH1D("mHProtonNeutronKStar" + mName, "N;k* (p-n) [GeV/c]", 2000, 0., 10.);
     mHPhotonsDeuteronsEP = new TH2D("mHPhotonsDeuteronsEP" + mName, "N;E (#gamma) [GeV]; p (d) [GeV/c]", 1000, 0., 10., 1000, 0., 10.);
 }
 
 void runPhotons::initEventsHisto()
 {
-    mEvents = new TH1D("mEvents" + mName, "Number of events", 6, 0, 6);
+    mEvents = new TH1D("mEvents" + mName, "Number of events", 7, 0, 7);
     mEvents->Fill("Number of unweighted Events", 0);
     mEvents->Fill("Number of Events", 0);
     mEvents->Fill("Number of accepted Events", 0);
@@ -73,8 +73,8 @@ void runPhotons::process()
                 TLorentzVector sum = p2.q[ipdgDeuterons] + p1.q[ipdgPhotons];
                 float DeltaE = sum.M() - mProtonMass - mNeutronMass;
                 float E2 = sum.M() * sum.M();
-                float kstarPN = 0.5 / sum.M() * sqrt(E2 * E2 + (mNeutronMass * mNeutronMass - mProtonMass * mProtonMass) * (mNeutronMass * mNeutronMass - mProtonMass * mProtonMass) - 2 * (mNeutronMass * mNeutronMass + mProtonMass * mProtonMass) * E2);
-                mHProtonNeutronkstar->Fill(kstarPN, 1. / kstarPN / kstarPN);
+                float kstarPN = 0.5 / sum.M() * sqrt(E2 * E2 + (mNeutronMass * mNeutronMass - mProtonMass * mProtonMass) * (mNeutronMass * mNeutronMass - mProtonMass * mProtonMass) - 2 * (mNeutronMass * mNeutronMass + mProtonMass * mProtonMass) * E2);                
+                if(kstarPN > mEnergyCut) mHProtonNeutronKStar->Fill(kstarPN); // 1. / kstarPN / kstarPN
             }
         }
     }
@@ -86,7 +86,7 @@ void runPhotons::writeHistos()
     mHPhotonsP->Write();
     mHPhotonsDeuteronsKStar->Write();
     mHPhotonsDeuteronsEP->Write();
-    mHProtonNeutronkstar->Write();
+    mHProtonNeutronKStar->Write();
 }
 
 int runPhotons::selectPhotons(const particleCand &p)
