@@ -76,7 +76,7 @@ void runAll(TString listname, TString outfolder, TString outname, double R_D = 3
   //-------- interactor ------------------------
   double vStrong = 0;
   vfempto *interactor;
-  auto R_0_eff = R_0*2*(-1); 
+  auto R_0_eff = R_0*2*(1); 
   if(! isWigner){
    interactor = new femptoSource;      // Lenard-Jones  strong potential
    interactor->setParams(17.4, R_D, 1.44, R_0_eff, 3./8);
@@ -144,7 +144,7 @@ void runAll(TString listname, TString outfolder, TString outname, double R_D = 3
     runDeAntiPr->doAnalysis();       // process the event
 
     spectra->setEvent(event);
-    spectra->doAnalysis(weight);
+    spectra->doAnalysis();
   }
 
   // finalization
