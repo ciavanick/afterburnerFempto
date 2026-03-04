@@ -37,8 +37,8 @@ private:
     float mMaxRapidity = 0.5;
     float mEnergyCut = 0.;
 
-    float mProtonMass = 0.938272088;
-    float mNeutronMass = 0.939565420;
+    float mProtonMass = utils::getMass(2212);
+    float mNeutronMass = utils::getMass(2112);
 
 
 };
