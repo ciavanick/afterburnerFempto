@@ -14,7 +14,11 @@ private:
     TH1D *mHPhotonsE = nullptr;
     TH1D *mHPhotonsP = nullptr;
     TH1D *mHPhotonsDeuteronsKStar = nullptr;
+    TH1D *mHPhotonsDeuteronsKStark100 = nullptr;
+    TH1D *mHPhotonsDeuteronsKStark50 = nullptr;
     TH1D *mHProtonNeutronKStar = nullptr;
+    TH1D *mHProtonNeutronKStark100 = nullptr;
+    TH1D *mHProtonNeutronKStark50 = nullptr;
 
     TH2D *mHPhotonsDeuteronsEP = nullptr;
 
